@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { neon } from '../lib/neon'
-import Dashboard from './Dashboard' // Importe le dashboard
+import Dashboard from './Dashboard'
 
 export default function ViewForm({ formId, onBack, isPublic = false }) {
   const [form, setForm] = useState(null)
@@ -8,7 +8,7 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
   const [answers, setAnswers] = useState({})
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
-  const [showResults, setShowResults] = useState(false) // Nouvel état
+  const [showResults, setShowResults] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -21,7 +21,6 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
     loadData()
   }, [formId])
 
-  // ... (handleAnswer et handleSubmit restent identiques) ...
   function handleAnswer(questionId, value) {
     setAnswers(prev => ({ ...prev, [questionId]: value }))
   }
@@ -29,24 +28,34 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setMessage('Envoi en cours…')
+    
     const { data: responseData, error: rError } = await neon.from('responses').insert({ form_id: formId }).select().single()
     if (rError) { setMessage(`Erreur : ${rError.message}`); return }
+    
     const answersToInsert = Object.entries(answers).map(([qId, val]) => ({
-      response_id: responseData.id, question_id: qId, value: Array.isArray(val) ? val.join(', ') : String(val)
+      response_id: responseData.id, 
+      question_id: qId, 
+      value: Array.isArray(val) ? val.join(', ') : String(val)
     }))
+    
     const { error: aError } = await neon.from('answers').insert(answersToInsert)
-    if (aError) setMessage(`Erreur : ${aError.message}`)
-    else { setMessage('Réponse envoyée avec succès ✅'); setAnswers({}) }
+    if (aError) {
+      setMessage(`Erreur : ${aError.message}`)
+    } else {
+      setMessage('Réponse envoyée avec succès ✅')
+      setAnswers({})
+    }
   }
 
   if (loading) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Chargement…</p>
   if (!form) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Formulaire introuvable.</p>
 
-  // Si on affiche les résultats
   if (showResults) {
     return (
       <div className={`public-form theme-${form.theme || 'pro'}`}>
-        <button onClick={() => setShowResults(false)} className="btn" style={{ marginBottom: '1rem' }}>← Retour au formulaire</button>
+        <button onClick={() => setShowResults(false)} className="btn" style={{ marginBottom: '1rem' }}>
+          ← Retour au formulaire
+        </button>
         <Dashboard formId={formId} isPublic={true} />
       </div>
     )
@@ -60,56 +69,115 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
         </button>
       )}
       
+      {/* AFFICHAGE DE L'IMAGE D'ILLUSTRATION */}
+      {form.image_url && (
+        <img 
+          src={form.image_url} 
+          alt="Illustration du formulaire" 
+          style={{ width: '100%', maxHeight: '250px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1.5rem', border: '2px solid currentColor' }} 
+        />
+      )}
+
       <h2>{form.title}</h2>
       <p style={{ opacity: 0.8 }}>{form.description}</p>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
-        {/* ... (Toute la boucle questions.map reste identique) ... */}
         {questions.map((q) => (
           <div key={q.id}>
-            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }}>{q.label} {q.required && '*'}</label>
-            {q.type === 'short_text' && <input type="text" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} />}
-            {q.type === 'long_text' && <textarea required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} rows={3} />}
-            {q.type === 'date' && <input type="date" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} />}
+            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }}>
+              {q.label} {q.required && '*'}
+            </label>
+            
+            {q.type === 'short_text' && (
+              <input type="text" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} />
+            )}
+            
+            {q.type === 'long_text' && (
+              <textarea required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} rows={3} />
+            )}
+
+            {q.type === 'date' && (
+              <input type="date" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} />
+            )}
+
             {q.type === 'single_choice' && q.options && (
               <select required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)}>
                 <option value="">-- Choisir --</option>
                 {q.options.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
               </select>
             )}
+
             {q.type === 'multiple_choice' && q.options && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {q.options.map((opt, i) => (
                   <label key={i} style={{ fontWeight: 'normal', display: 'flex', alignItems: 'center' }}>
-                    <input type="checkbox" style={{ width: 'auto', marginRight: '0.5rem' }} onChange={(e) => {
-                      const current = answers[q.id] || []; const next = e.target.checked ? [...current, opt] : current.filter(v => v !== opt); handleAnswer(q.id, next);
-                    }} /> {opt}
+                    <input 
+                      type="checkbox" 
+                      style={{ width: 'auto', marginRight: '0.5rem' }} 
+                      onChange={(e) => {
+                        const current = answers[q.id] || []
+                        const next = e.target.checked ? [...current, opt] : current.filter(v => v !== opt)
+                        handleAnswer(q.id, next)
+                      }} 
+                    /> 
+                    {opt}
                   </label>
                 ))}
               </div>
             )}
+
             {q.type === 'rating' && (
               <div style={{ display: 'flex', gap: '1rem' }}>
                 {[1, 2, 3, 4, 5].map(n => (
                   <label key={n} style={{ fontWeight: 'normal', display: 'flex', alignItems: 'center' }}>
-                    <input type="radio" name={`q_${q.id}`} value={n} required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} style={{ width: 'auto', marginRight: '0.25rem' }} /> {n}
+                    <input 
+                      type="radio" 
+                      name={`q_${q.id}`} 
+                      value={n} 
+                      required={q.required} 
+                      onChange={(e) => handleAnswer(q.id, e.target.value)} 
+                      style={{ width: 'auto', marginRight: '0.25rem' }} 
+                    /> 
+                    {n}
                   </label>
                 ))}
               </div>
             )}
+
             {q.type === 'boolean' && (
               <div style={{ display: 'flex', gap: '1.5rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center' }}><input type="radio" name={`q_${q.id}`} value="Oui" required={q.required} onChange={(e) => handleAnswer(q.id, 'Oui')} style={{ width: 'auto', marginRight: '0.25rem' }} /> Oui</label>
-                <label style={{ display: 'flex', alignItems: 'center' }}><input type="radio" name={`q_${q.id}`} value="Non" required={q.required} onChange={(e) => handleAnswer(q.id, 'Non')} style={{ width: 'auto', marginRight: '0.25rem' }} /> Non</label>
+                <label style={{ display: 'flex', alignItems: 'center' }}>
+                  <input 
+                    type="radio" 
+                    name={`q_${q.id}`} 
+                    value="Oui" 
+                    required={q.required} 
+                    onChange={(e) => handleAnswer(q.id, 'Oui')} 
+                    style={{ width: 'auto', marginRight: '0.25rem' }} 
+                  /> 
+                  Oui
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center' }}>
+                  <input 
+                    type="radio" 
+                    name={`q_${q.id}`} 
+                    value="Non" 
+                    required={q.required} 
+                    onChange={(e) => handleAnswer(q.id, 'Non')} 
+                    style={{ width: 'auto', marginRight: '0.25rem' }} 
+                  /> 
+                  Non
+                </label>
               </div>
             )}
           </div>
         ))}
+        
         <button type="submit">Envoyer les réponses</button>
       </form>
+      
       {message && <p style={{ marginTop: '1.5rem', fontWeight: 'bold', textAlign: 'center' }}>{message}</p>}
 
-      {/* NOUVEAU : Bouton pour voir les résultats publics */}
       <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px dashed currentColor', paddingTop: '1rem' }}>
         <button type="button" onClick={() => setShowResults(true)} style={{ background: 'transparent', border: 'none', textDecoration: 'underline', color: 'inherit', cursor: 'pointer', opacity: 0.7 }}>
           Voir les résultats
