@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { neon } from '../lib/neon'
 
-// --- COMPOSANT : GRAPHIQUE EN DONUT (SVG PUR) ---
+// --- COMPOSANTS GRAPHIQUES ---
 function DonutChart({ data, total }) {
   let accumulatedPercent = 0
   const radius = 50
@@ -35,7 +35,6 @@ function DonutChart({ data, total }) {
   )
 }
 
-// --- COMPOSANT : BARRE DE PROGRESSION ---
 function BarChart({ data, total }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -57,7 +56,7 @@ function BarChart({ data, total }) {
   )
 }
 
-// --- FONCTIONS D'EXPORT ---
+// --- FONCTIONS UTILITAIRES ---
 function downloadFile(content, fileName, contentType) {
   const a = document.createElement("a");
   const file = new Blob([content], { type: contentType });
@@ -65,6 +64,43 @@ function downloadFile(content, fileName, contentType) {
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// Calcule la médiane, le mode et l'écart-type d'un tableau de nombres
+function calculateAdvancedStats(values) {
+  if (values.length === 0) return null
+  const sorted = [...values].sort((a, b) => a - b)
+  const count = values.length
+  
+  // Moyenne
+  const mean = values.reduce((a, b) => a + b, 0) / count
+
+  // Médiane
+  const mid = Math.floor(count / 2)
+  const median = count % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+
+  // Mode (la valeur qui apparaît le plus souvent)
+  const freqMap = {}
+  let maxFreq = 0
+  let mode = values[0]
+  values.forEach(v => {
+    freqMap[v] = (freqMap[v] || 0) + 1
+    if (freqMap[v] > maxFreq) {
+      maxFreq = freqMap[v]
+      mode = v
+    }
+  })
+
+  // Écart-type
+  const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / count
+  const stdDev = Math.sqrt(variance)
+
+  return {
+    mean: mean.toFixed(2),
+    median: median.toFixed(1),
+    mode: mode,
+    stdDev: stdDev.toFixed(2)
+  }
 }
 
 export default function Dashboard({ formId, onBack, isPublic = false }) {
@@ -84,28 +120,20 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     load()
   }, [formId])
 
-  // --- LOGIQUE D'EXPORT CSV ---
   function handleExportCSV() {
-    // 1. Créer les en-têtes : Date + Titre des questions
     const headers = ['Date de soumission', ...questions.map(q => `"${q.label.replace(/"/g, '""')}"`)]
-    
-    // 2. Créer les lignes de données
     const rows = responses.map(r => {
       const date = new Date(r.submitted_at).toLocaleString()
       const answers = questions.map(q => {
         const ans = r.answers?.find(a => a.question_id === q.id)
-        // On échappe les guillemets doubles pour le CSV
         return ans && ans.value ? `"${ans.value.replace(/"/g, '""')}"` : '""'
       })
-      return [date, ...answers].join(';') // Utilisation du point-virgule pour Excel FR
+      return [date, ...answers].join(';')
     })
-
     const csvContent = [headers.join(';'), ...rows].join('\n')
-    // Ajout du BOM UTF-8 pour qu'Excel affiche bien les accents
     downloadFile('\uFEFF' + csvContent, `export_formulaire_${formId}.csv`, 'text/csv;charset=utf-8;')
   }
 
-  // --- LOGIQUE D'EXPORT JSON ---
   function handleExportJSON() {
     const cleanData = responses.map(r => {
       const obj = { date: r.submitted_at }
@@ -120,15 +148,15 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
 
   if (loading) return <p>Chargement des résultats…</p>
 
-  // --- ANALYSE DES DONNÉES ---
   const chartQuestions = questions.filter(q => ['single_choice', 'multiple_choice', 'rating', 'boolean'].includes(q.type))
-  const ratingQuestions = questions.filter(q => q.type === 'rating')
   const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00b894', '#0984e3']
 
-  let averageScore = null
+  // --- ANALYSE GLOBALE ---
+  let globalAverageScore = null
+  const ratingQuestions = questions.filter(q => q.type === 'rating')
+  
   if (ratingQuestions.length > 0 && responses.length > 0) {
-    let totalScore = 0
-    let totalVotes = 0
+    let totalScore = 0; let totalVotes = 0
     ratingQuestions.forEach(q => {
       responses.forEach(r => {
         const ans = r.answers?.find(a => a.question_id === q.id)
@@ -138,11 +166,14 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         }
       })
     })
-    if (totalVotes > 0) averageScore = (totalScore / totalVotes).toFixed(1)
+    if (totalVotes > 0) globalAverageScore = (totalScore / totalVotes).toFixed(1)
   }
 
+  // --- ANALYSE PAR QUESTION ---
   const stats = chartQuestions.map(q => {
     let counts = {}
+    let rawValues = [] // On stocke les valeurs brutes pour les questions de note
+
     if (q.type === 'multiple_choice' || q.type === 'single_choice') {
       (q.options || []).forEach(opt => counts[opt] = 0)
     } else if (q.type === 'rating') {
@@ -157,7 +188,10 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         if (q.type === 'multiple_choice') {
           ans.value.split(', ').forEach(val => { if (counts[val] !== undefined) counts[val]++ })
         } else {
-          if (counts[ans.value] !== undefined) counts[ans.value]++
+          if (counts[ans.value] !== undefined) {
+            counts[ans.value]++
+            if (q.type === 'rating') rawValues.push(parseInt(ans.value))
+          }
         }
       }
     })
@@ -167,7 +201,9 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
       label, count, color: colors[i % colors.length]
     }))
 
-    return { question: q, dataArray, totalVotes }
+    const advancedStats = q.type === 'rating' ? calculateAdvancedStats(rawValues) : null
+
+    return { question: q, dataArray, totalVotes, advancedStats }
   })
 
   return (
@@ -176,7 +212,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         <button className="btn" onClick={onBack} style={{ marginBottom: '2rem' }}>← Retour aux formulaires</button>
       )}
       
-      {/* EN-TÊTE DU DASHBOARD AVEC BOUTONS D'EXPORT */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0', color: 'var(--text)' }}>Tableau de bord</h2>
@@ -185,30 +220,22 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         
         {responses.length > 0 && (
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn" onClick={handleExportCSV} style={{ backgroundColor: '#28a745', color: 'white', borderColor: '#1a1a1a' }}>
-              📥 Export CSV
-            </button>
-            <button className="btn" onClick={handleExportJSON} style={{ backgroundColor: '#17a2b8', color: 'white', borderColor: '#1a1a1a' }}>
-              📦 Export JSON
-            </button>
+            <button className="btn" onClick={handleExportCSV} style={{ backgroundColor: '#28a745', color: 'white', borderColor: '#1a1a1a' }}>📥 Export CSV</button>
+            <button className="btn" onClick={handleExportJSON} style={{ backgroundColor: '#17a2b8', color: 'white', borderColor: '#1a1a1a' }}>📦 Export JSON</button>
           </div>
         )}
       </div>
 
-      {/* ... (Le reste des KPI, graphiques et réponses brutes reste identique) ... */}
-      
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid var(--primary)' }}>
           <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Total Réponses</p>
           <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{responses.length}</h2>
         </div>
         
-        {averageScore && (
+        {globalAverageScore && (
           <div className="card" style={{ textAlign: 'center', borderTop: '8px solid #feca57' }}>
-            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Moyenne des notes</p>
-            <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>
-              {averageScore} <span style={{ fontSize: '1.5rem', color: '#feca57' }}>★</span>
-            </h2>
+            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Moyenne globale</p>
+            <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{globalAverageScore} <span style={{ fontSize: '1.5rem', color: '#feca57' }}>★</span></h2>
           </div>
         )}
 
@@ -225,11 +252,13 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
+      {/* GRILLE DES GRAPHIQUES */}
       {responses.length > 0 && chartQuestions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-          {stats.map(({ question, dataArray, totalVotes }) => (
+          {stats.map(({ question, dataArray, totalVotes, advancedStats }) => (
             <div key={question.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
               <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', lineHeight: '1.3', color: 'var(--text)' }}>{question.label}</h4>
+              
               <div style={{ marginTop: 'auto' }}>
                 {(question.type === 'single_choice' || question.type === 'boolean') && totalVotes > 0 ? (
                   <DonutChart data={dataArray.filter(d => d.count > 0)} total={totalVotes} />
@@ -237,11 +266,33 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
                   <BarChart data={dataArray} total={totalVotes} />
                 )}
               </div>
+
+              {/* STATISTIQUES AVANCÉES POUR LES NOTES */}
+              {advancedStats && (
+                <div style={{ 
+                  marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed var(--text)', 
+                  display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' 
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Médiane</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>{advancedStats.median}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Mode</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>{advancedStats.mode}</div>
+                  </div>
+                  <div title="Un écart-type élevé signifie que les avis sont très divisés.">
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Écart-type</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>±{advancedStats.stdDev}</div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
+      {/* RÉPONSES BRUTES MASQUÉES */}
       {responses.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
           <button className="btn" onClick={() => setShowRaw(!showRaw)} style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
