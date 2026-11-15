@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react'
 import { neon } from '../lib/neon'
 
+// --- LISTE DES MOTS VIDES (STOP WORDS FRANÇAIS) ---
+const STOP_WORDS = new Set([
+  'le', 'la', 'les', 'de', 'des', 'un', 'une', 'et', 'en', 'du', 'au', 'aux', 'ce', 'ces', 'cet', 'cette',
+  'dans', 'pour', 'par', 'sur', 'avec', 'pas', 'plus', 'ne', 'se', 'sa', 'son', 'ses', 'je', 'tu', 'il',
+  'elle', 'nous', 'vous', 'ils', 'elles', 'que', 'qui', 'quoi', 'dont', 'ou', 'où', 'mais', 'donc', 'or',
+  'ni', 'car', 'est', 'sont', 'a', 'ont', 'as', 'ai', 'été', 'être', 'avoir', 'fait', 'faire', 'tout',
+  'tous', 'toute', 'toutes', 'bien', 'très', 'aussi', 'comme', 'si', 'y', 'à', 'd', 'l', 'j', 't',
+  's', 'c', 'n', 'm', 'qu', 'mon', 'ton', 'votre', 'notre', 'leur', 'leurs'
+])
+
 // --- COMPOSANTS GRAPHIQUES ---
 function DonutChart({ data, total }) {
   let accumulatedPercent = 0
@@ -73,7 +83,6 @@ function calculateAdvancedStats(values) {
   const mean = values.reduce((a, b) => a + b, 0) / count
   const mid = Math.floor(count / 2)
   const median = count % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
-  
   const freqMap = {}
   let maxFreq = 0
   let mode = values[0]
@@ -81,11 +90,39 @@ function calculateAdvancedStats(values) {
     freqMap[v] = (freqMap[v] || 0) + 1
     if (freqMap[v] > maxFreq) { maxFreq = freqMap[v]; mode = v }
   })
-
   const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / count
   const stdDev = Math.sqrt(variance)
-
   return { mean: mean.toFixed(2), median: median.toFixed(1), mode: mode, stdDev: stdDev.toFixed(2) }
+}
+
+// --- NOUVEAU : GÉNÉRATEUR DE NUAGE DE MOTS ---
+function generateWordCloud(responses, questions) {
+  const textQuestions = questions.filter(q => q.type === 'short_text' || q.type === 'long_text')
+  if (textQuestions.length === 0) return []
+
+  const wordCounts = {}
+  responses.forEach(r => {
+    textQuestions.forEach(q => {
+      const ans = r.answers?.find(a => a.question_id === q.id)
+      if (ans && ans.value) {
+        // Nettoyage : minuscules, suppression de la ponctuation, séparation par espace
+        const tokens = ans.value.toLowerCase()
+          .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, ' ')
+          .split(/\s+/)
+          .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+        
+        tokens.forEach(w => {
+          wordCounts[w] = (wordCounts[w] || 0) + 1
+        })
+      }
+    })
+  })
+
+  // Trier par fréquence décroissante et garder le top 30
+  return Object.entries(wordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30)
+    .map(([text, value]) => ({ text, value }))
 }
 
 export default function Dashboard({ formId, onBack, isPublic = false }) {
@@ -133,25 +170,20 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
 
   if (loading) return <p>Chargement des résultats…</p>
 
-  // --- CALCUL DU TIMELINE ---
+  // --- CALCULS ---
   const timelineData = {}
   responses.forEach(r => {
-    // On groupe par jour (format YYYY-MM-DD)
     const dateStr = new Date(r.submitted_at).toISOString().split('T')[0]
     timelineData[dateStr] = (timelineData[dateStr] || 0) + 1
   })
-
-  // Trier les dates chronologiquement
   const sortedDates = Object.keys(timelineData).sort()
   const maxResponsesInADay = Math.max(...Object.values(timelineData), 1)
 
-  // --- ANALYSE DES QUESTIONS ---
   const chartQuestions = questions.filter(q => ['single_choice', 'multiple_choice', 'rating', 'boolean'].includes(q.type))
   const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00b894', '#0984e3']
 
   let globalAverageScore = null
   const ratingQuestions = questions.filter(q => q.type === 'rating')
-  
   if (ratingQuestions.length > 0 && responses.length > 0) {
     let totalScore = 0; let totalVotes = 0
     ratingQuestions.forEach(q => {
@@ -169,7 +201,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
   const stats = chartQuestions.map(q => {
     let counts = {}
     let rawValues = [] 
-
     if (q.type === 'multiple_choice' || q.type === 'single_choice') {
       (q.options || []).forEach(opt => counts[opt] = 0)
     } else if (q.type === 'rating') {
@@ -193,13 +224,14 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     })
 
     const totalVotes = Object.values(counts).reduce((a, b) => a + b, 0)
-    const dataArray = Object.entries(counts).map(([label, count], i) => ({
-      label, count, color: colors[i % colors.length]
-    }))
-
+    const dataArray = Object.entries(counts).map(([label, count], i) => ({ label, count, color: colors[i % colors.length] }))
     const advancedStats = q.type === 'rating' ? calculateAdvancedStats(rawValues) : null
     return { question: q, dataArray, totalVotes, advancedStats }
   })
+
+  // Calcul du nuage de mots
+  const wordCloudData = generateWordCloud(responses, questions)
+  const maxWordValue = wordCloudData.length > 0 ? wordCloudData[0].value : 1
 
   return (
     <div>
@@ -212,7 +244,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
           <h2 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0', color: 'var(--text)' }}>Tableau de bord</h2>
           <p style={{ color: 'var(--text)', opacity: 0.7, margin: 0 }}>Analyse des performances de ton formulaire.</p>
         </div>
-        
         {responses.length > 0 && (
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn" onClick={handleExportCSV} style={{ backgroundColor: '#28a745', color: 'white', borderColor: '#1a1a1a' }}>📥 Export CSV</button>
@@ -221,54 +252,72 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         )}
       </div>
 
-      {/* --- KPI CARDS --- */}
+      {/* KPI CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid var(--primary)' }}>
           <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Total Réponses</p>
           <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{responses.length}</h2>
         </div>
-        
         {globalAverageScore && (
           <div className="card" style={{ textAlign: 'center', borderTop: '8px solid #feca57' }}>
             <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Moyenne globale</p>
             <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{globalAverageScore} <span style={{ fontSize: '1.5rem', color: '#feca57' }}>★</span></h2>
           </div>
         )}
-
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid #4ecdc4' }}>
           <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Questions</p>
           <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{questions.length}</h2>
         </div>
       </div>
 
-      {/* --- TIMELINE GRAPHIQUE --- */}
+      {/* TIMELINE */}
       {responses.length > 0 && sortedDates.length > 0 && (
         <div className="card" style={{ marginBottom: '3rem', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>Volume de réponses dans le temps</h4>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '150px', overflowX: 'auto', paddingBottom: '1rem', borderBottom: '2px solid var(--text)' }}>
             {sortedDates.map(date => {
               const count = timelineData[date]
-              // Calcul de la hauteur relative (max 100%)
               const heightPercent = (count / maxResponsesInADay) * 100
-              // Formatage de la date pour l'affichage (ex: "12 Oct")
               const displayDate = new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-
               return (
                 <div key={date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--text)' }}>{count}</span>
-                  <div 
-                    style={{ 
-                      width: '30px', 
-                      height: `${Math.max(heightPercent, 5)}%`, // Min 5% pour que la barre soit toujours visible
-                      backgroundColor: 'var(--primary)', 
-                      border: '2px solid var(--text)',
-                      borderRadius: '4px 4px 0 0',
-                      transition: 'height 1s ease-in-out'
-                    }} 
-                    title={`${count} réponse(s)`}
-                  />
+                  <div style={{ width: '30px', height: `${Math.max(heightPercent, 5)}%`, backgroundColor: 'var(--primary)', border: '2px solid var(--text)', borderRadius: '4px 4px 0 0', transition: 'height 1s ease-in-out' }} title={`${count} réponse(s)`} />
                   <span style={{ fontSize: '0.7rem', marginTop: '0.5rem', color: 'var(--text)', opacity: 0.7, whiteSpace: 'nowrap' }}>{displayDate}</span>
                 </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* NUAGE DE MOTS */}
+      {responses.length > 0 && wordCloudData.length > 0 && (
+        <div className="card" style={{ marginBottom: '3rem', padding: '2rem', textAlign: 'center' }}>
+          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>Nuage de mots (Questions textuelles)</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '1rem' }}>
+            {wordCloudData.map((word, i) => {
+              // La taille varie de 1rem à 3.5rem selon la fréquence
+              const fontSize = 1 + (word.value / maxWordValue) * 2.5
+              const color = colors[i % colors.length]
+              return (
+                <span 
+                  key={word.text} 
+                  title={`Apparaît ${word.value} fois`}
+                  style={{ 
+                    fontSize: `${fontSize}rem`, 
+                    fontWeight: '900', 
+                    color: color,
+                    textShadow: '1px 1px 0px var(--text)',
+                    lineHeight: '1',
+                    transition: 'transform 0.2s',
+                    cursor: 'default'
+                  }}
+                  onMouseOver={(e) => e.target.style.transform = 'scale(1.1)'}
+                  onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                >
+                  {word.text}
+                </span>
               )
             })}
           </div>
@@ -282,13 +331,12 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* GRILLE DES GRAPHIQUES DES QUESTIONS */}
+      {/* GRILLE DES GRAPHIQUES */}
       {responses.length > 0 && chartQuestions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           {stats.map(({ question, dataArray, totalVotes, advancedStats }) => (
             <div key={question.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
               <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', lineHeight: '1.3', color: 'var(--text)' }}>{question.label}</h4>
-              
               <div style={{ marginTop: 'auto' }}>
                 {(question.type === 'single_choice' || question.type === 'boolean') && totalVotes > 0 ? (
                   <DonutChart data={dataArray.filter(d => d.count > 0)} total={totalVotes} />
@@ -296,7 +344,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
                   <BarChart data={dataArray} total={totalVotes} />
                 )}
               </div>
-
               {advancedStats && (
                 <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed var(--text)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
                   <div>
