@@ -66,41 +66,26 @@ function downloadFile(content, fileName, contentType) {
   URL.revokeObjectURL(a.href);
 }
 
-// Calcule la médiane, le mode et l'écart-type d'un tableau de nombres
 function calculateAdvancedStats(values) {
   if (values.length === 0) return null
   const sorted = [...values].sort((a, b) => a - b)
   const count = values.length
-  
-  // Moyenne
   const mean = values.reduce((a, b) => a + b, 0) / count
-
-  // Médiane
   const mid = Math.floor(count / 2)
   const median = count % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
-
-  // Mode (la valeur qui apparaît le plus souvent)
+  
   const freqMap = {}
   let maxFreq = 0
   let mode = values[0]
   values.forEach(v => {
     freqMap[v] = (freqMap[v] || 0) + 1
-    if (freqMap[v] > maxFreq) {
-      maxFreq = freqMap[v]
-      mode = v
-    }
+    if (freqMap[v] > maxFreq) { maxFreq = freqMap[v]; mode = v }
   })
 
-  // Écart-type
   const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / count
   const stdDev = Math.sqrt(variance)
 
-  return {
-    mean: mean.toFixed(2),
-    median: median.toFixed(1),
-    mode: mode,
-    stdDev: stdDev.toFixed(2)
-  }
+  return { mean: mean.toFixed(2), median: median.toFixed(1), mode: mode, stdDev: stdDev.toFixed(2) }
 }
 
 export default function Dashboard({ formId, onBack, isPublic = false }) {
@@ -148,10 +133,22 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
 
   if (loading) return <p>Chargement des résultats…</p>
 
+  // --- CALCUL DU TIMELINE ---
+  const timelineData = {}
+  responses.forEach(r => {
+    // On groupe par jour (format YYYY-MM-DD)
+    const dateStr = new Date(r.submitted_at).toISOString().split('T')[0]
+    timelineData[dateStr] = (timelineData[dateStr] || 0) + 1
+  })
+
+  // Trier les dates chronologiquement
+  const sortedDates = Object.keys(timelineData).sort()
+  const maxResponsesInADay = Math.max(...Object.values(timelineData), 1)
+
+  // --- ANALYSE DES QUESTIONS ---
   const chartQuestions = questions.filter(q => ['single_choice', 'multiple_choice', 'rating', 'boolean'].includes(q.type))
   const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00b894', '#0984e3']
 
-  // --- ANALYSE GLOBALE ---
   let globalAverageScore = null
   const ratingQuestions = questions.filter(q => q.type === 'rating')
   
@@ -169,10 +166,9 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     if (totalVotes > 0) globalAverageScore = (totalScore / totalVotes).toFixed(1)
   }
 
-  // --- ANALYSE PAR QUESTION ---
   const stats = chartQuestions.map(q => {
     let counts = {}
-    let rawValues = [] // On stocke les valeurs brutes pour les questions de note
+    let rawValues = [] 
 
     if (q.type === 'multiple_choice' || q.type === 'single_choice') {
       (q.options || []).forEach(opt => counts[opt] = 0)
@@ -202,7 +198,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     }))
 
     const advancedStats = q.type === 'rating' ? calculateAdvancedStats(rawValues) : null
-
     return { question: q, dataArray, totalVotes, advancedStats }
   })
 
@@ -226,7 +221,8 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      {/* --- KPI CARDS --- */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid var(--primary)' }}>
           <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Total Réponses</p>
           <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{responses.length}</h2>
@@ -245,6 +241,40 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       </div>
 
+      {/* --- TIMELINE GRAPHIQUE --- */}
+      {responses.length > 0 && sortedDates.length > 0 && (
+        <div className="card" style={{ marginBottom: '3rem', padding: '1.5rem' }}>
+          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>Volume de réponses dans le temps</h4>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '150px', overflowX: 'auto', paddingBottom: '1rem', borderBottom: '2px solid var(--text)' }}>
+            {sortedDates.map(date => {
+              const count = timelineData[date]
+              // Calcul de la hauteur relative (max 100%)
+              const heightPercent = (count / maxResponsesInADay) * 100
+              // Formatage de la date pour l'affichage (ex: "12 Oct")
+              const displayDate = new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+
+              return (
+                <div key={date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--text)' }}>{count}</span>
+                  <div 
+                    style={{ 
+                      width: '30px', 
+                      height: `${Math.max(heightPercent, 5)}%`, // Min 5% pour que la barre soit toujours visible
+                      backgroundColor: 'var(--primary)', 
+                      border: '2px solid var(--text)',
+                      borderRadius: '4px 4px 0 0',
+                      transition: 'height 1s ease-in-out'
+                    }} 
+                    title={`${count} réponse(s)`}
+                  />
+                  <span style={{ fontSize: '0.7rem', marginTop: '0.5rem', color: 'var(--text)', opacity: 0.7, whiteSpace: 'nowrap' }}>{displayDate}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {responses.length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
           <p style={{ fontSize: '1.2rem', margin: 0 }}>Aucune donnée pour le moment.</p>
@@ -252,7 +282,7 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* GRILLE DES GRAPHIQUES */}
+      {/* GRILLE DES GRAPHIQUES DES QUESTIONS */}
       {responses.length > 0 && chartQuestions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           {stats.map(({ question, dataArray, totalVotes, advancedStats }) => (
@@ -267,12 +297,8 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
                 )}
               </div>
 
-              {/* STATISTIQUES AVANCÉES POUR LES NOTES */}
               {advancedStats && (
-                <div style={{ 
-                  marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed var(--text)', 
-                  display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' 
-                }}>
+                <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed var(--text)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
                   <div>
                     <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Médiane</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>{advancedStats.median}</div>
