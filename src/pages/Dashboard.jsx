@@ -66,6 +66,75 @@ function BarChart({ data, total }) {
   )
 }
 
+// --- NOUVEAU : COMPOSANT RADAR CHART ---
+function RadarChart({ data }) {
+  const size = 300
+  const center = size / 2
+  const radius = size / 2 - 50 // Marge pour les labels
+  const angleStep = (Math.PI * 2) / data.length
+
+  const getPoint = (value, max, index) => {
+    const angle = index * angleStep - Math.PI / 2
+    const r = (value / max) * radius
+    return {
+      x: center + r * Math.cos(angle),
+      y: center + r * Math.sin(angle)
+    }
+  }
+
+  const pointsString = data.map((d, i) => {
+    const p = getPoint(d.value, d.max, i)
+    return `${p.x},${p.y}`
+  }).join(' ')
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Grille de fond (polygones concentriques) */}
+        {[0.25, 0.5, 0.75, 1].map(level => {
+          const gridPoints = data.map((_, i) => {
+            const p = getPoint(level * 5, 5, i) // 5 est le max théorique
+            return `${p.x},${p.y}`
+          }).join(' ')
+          return <polygon key={level} points={gridPoints} fill="none" stroke="var(--text)" strokeOpacity={0.15} />
+        })}
+
+        {/* Lignes des axes */}
+        {data.map((_, i) => {
+          const p = getPoint(5, 5, i)
+          return <line key={i} x1={center} y1={center} x2={p.x} y2={p.y} stroke="var(--text)" strokeOpacity={0.15} />
+        })}
+
+        {/* Polygone des données */}
+        <polygon points={pointsString} fill="var(--primary)" fillOpacity={0.6} stroke="var(--primary)" strokeWidth={3} />
+
+        {/* Points et Labels */}
+        {data.map((d, i) => {
+          const p = getPoint(d.value, d.max, i)
+          const labelP = getPoint(5.8, 5, i) // Positionnement des labels à l'extérieur
+          
+          return (
+            <g key={i}>
+              <circle cx={p.x} cy={p.y} r={5} fill="var(--primary)" stroke="var(--text)" strokeWidth={2} />
+              <text 
+                x={labelP.x} 
+                y={labelP.y} 
+                textAnchor="middle" 
+                dominantBaseline="middle" 
+                fontSize="11" 
+                fontWeight="bold" 
+                fill="var(--text)"
+              >
+                {d.label.length > 15 ? d.label.substring(0, 15) + '...' : d.label}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
 // --- FONCTIONS UTILITAIRES ---
 function downloadFile(content, fileName, contentType) {
   const a = document.createElement("a");
@@ -95,7 +164,6 @@ function calculateAdvancedStats(values) {
   return { mean: mean.toFixed(2), median: median.toFixed(1), mode: mode, stdDev: stdDev.toFixed(2) }
 }
 
-// --- NOUVEAU : GÉNÉRATEUR DE NUAGE DE MOTS ---
 function generateWordCloud(responses, questions) {
   const textQuestions = questions.filter(q => q.type === 'short_text' || q.type === 'long_text')
   if (textQuestions.length === 0) return []
@@ -105,20 +173,16 @@ function generateWordCloud(responses, questions) {
     textQuestions.forEach(q => {
       const ans = r.answers?.find(a => a.question_id === q.id)
       if (ans && ans.value) {
-        // Nettoyage : minuscules, suppression de la ponctuation, séparation par espace
         const tokens = ans.value.toLowerCase()
           .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, ' ')
           .split(/\s+/)
           .filter(w => w.length > 2 && !STOP_WORDS.has(w))
         
-        tokens.forEach(w => {
-          wordCounts[w] = (wordCounts[w] || 0) + 1
-        })
+        tokens.forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1 })
       }
     })
   })
 
-  // Trier par fréquence décroissante et garder le top 30
   return Object.entries(wordCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 30)
@@ -130,6 +194,9 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [showRaw, setShowRaw] = useState(false)
+  
+  // Nouvel état pour afficher/masquer le nuage de mots
+  const [showWordCloud, setShowWordCloud] = useState(false) 
 
   useEffect(() => {
     async function load() {
@@ -182,18 +249,25 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
   const chartQuestions = questions.filter(q => ['single_choice', 'multiple_choice', 'rating', 'boolean'].includes(q.type))
   const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00b894', '#0984e3']
 
-  let globalAverageScore = null
   const ratingQuestions = questions.filter(q => q.type === 'rating')
+  let globalAverageScore = null
+  let radarData = []
+
   if (ratingQuestions.length > 0 && responses.length > 0) {
     let totalScore = 0; let totalVotes = 0
     ratingQuestions.forEach(q => {
+      let qScore = 0; let qVotes = 0
       responses.forEach(r => {
         const ans = r.answers?.find(a => a.question_id === q.id)
         if (ans && ans.value) {
           const val = parseInt(ans.value)
-          if (!isNaN(val)) { totalScore += val; totalVotes++ }
+          if (!isNaN(val)) { totalScore += val; totalVotes++; qScore += val; qVotes++ }
         }
       })
+      // Si on a au moins 3 questions de notes, on prépare les données du Radar
+      if (ratingQuestions.length >= 3) {
+        radarData.push({ label: q.label, value: qVotes > 0 ? (qScore / qVotes) : 0, max: 5 })
+      }
     })
     if (totalVotes > 0) globalAverageScore = (totalScore / totalVotes).toFixed(1)
   }
@@ -229,7 +303,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     return { question: q, dataArray, totalVotes, advancedStats }
   })
 
-  // Calcul du nuage de mots
   const wordCloudData = generateWordCloud(responses, questions)
   const maxWordValue = wordCloudData.length > 0 ? wordCloudData[0].value : 1
 
@@ -291,28 +364,28 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* NUAGE DE MOTS */}
+      {/* BOUTON TOGGLE NUAGE DE MOTS */}
       {responses.length > 0 && wordCloudData.length > 0 && (
+        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn" onClick={() => setShowWordCloud(!showWordCloud)}>
+            {showWordCloud ? 'Masquer le nuage de mots' : 'Afficher le nuage de mots ☁️'}
+          </button>
+        </div>
+      )}
+
+      {/* NUAGE DE MOTS (Optionnel) */}
+      {responses.length > 0 && showWordCloud && wordCloudData.length > 0 && (
         <div className="card" style={{ marginBottom: '3rem', padding: '2rem', textAlign: 'center' }}>
           <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>Nuage de mots (Questions textuelles)</h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '1rem' }}>
             {wordCloudData.map((word, i) => {
-              // La taille varie de 1rem à 3.5rem selon la fréquence
               const fontSize = 1 + (word.value / maxWordValue) * 2.5
               const color = colors[i % colors.length]
               return (
                 <span 
                   key={word.text} 
                   title={`Apparaît ${word.value} fois`}
-                  style={{ 
-                    fontSize: `${fontSize}rem`, 
-                    fontWeight: '900', 
-                    color: color,
-                    textShadow: '1px 1px 0px var(--text)',
-                    lineHeight: '1',
-                    transition: 'transform 0.2s',
-                    cursor: 'default'
-                  }}
+                  style={{ fontSize: `${fontSize}rem`, fontWeight: '900', color: color, textShadow: '1px 1px 0px var(--text)', lineHeight: '1', transition: 'transform 0.2s', cursor: 'default' }}
                   onMouseOver={(e) => e.target.style.transform = 'scale(1.1)'}
                   onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 >
@@ -324,6 +397,14 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
+      {/* RADAR CHART (Si au moins 3 questions de notes) */}
+      {radarData.length >= 3 && (
+        <div className="card" style={{ marginBottom: '3rem' }}>
+          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)', textAlign: 'center' }}>Vue d'ensemble (Radar des notes)</h4>
+          <RadarChart data={radarData} />
+        </div>
+      )}
+
       {responses.length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
           <p style={{ fontSize: '1.2rem', margin: 0 }}>Aucune donnée pour le moment.</p>
@@ -331,7 +412,7 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* GRILLE DES GRAPHIQUES */}
+      {/* GRILLE DES GRAPHIQUES DES QUESTIONS */}
       {responses.length > 0 && chartQuestions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           {stats.map(({ question, dataArray, totalVotes, advancedStats }) => (
