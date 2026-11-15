@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { neon } from '../lib/neon'
 
-export default function ViewForm({ formId, onBack }) {
+export default function ViewForm({ formId, onBack, isPublic = false }) {
   const [form, setForm] = useState(null)
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState({})
@@ -63,8 +63,14 @@ export default function ViewForm({ formId, onBack }) {
   if (!form) return <p>Formulaire introuvable.</p>
 
   return (
-    <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: 8 }}>
-      <button onClick={onBack} style={{ marginBottom: '1rem' }}>← Retour</button>
+    <div style={{ marginTop: isPublic ? '0' : '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: 8 }}>
+      {/* Le bouton Retour ne s'affiche que si on n'est pas en mode public */}
+      {!isPublic && (
+        <button onClick={onBack} style={{ marginBottom: '1rem', padding: '0.5rem', cursor: 'pointer' }}>
+          ← Retour
+        </button>
+      )}
+      
       <h2>{form.title}</h2>
       <p style={{ color: '#666' }}>{form.description}</p>
       

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { neon } from './lib/neon'
 import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
@@ -16,11 +16,30 @@ function App() {
   const [selectedFormId, setSelectedFormId] = useState(null)
   const [selectedDashboardId, setSelectedDashboardId] = useState(null)
 
+  // --- NOUVEAU : Lecture de l'URL pour le lien public ---
+  const [publicFormId, setPublicFormId] = useState(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const formId = params.get('form')
+    if (formId) setPublicFormId(formId)
+  }, [])
+  // -----------------------------------------------------
+
   async function handleSignOut() {
     await neon.auth.signOut()
     setUser(null)
     setView('signin')
     setAppView('list')
+  }
+
+  // Si c'est un visiteur public qui a cliqué sur un lien
+  if (publicFormId) {
+    return (
+      <div style={{ maxWidth: 700, margin: '2rem auto', padding: '1rem', fontFamily: 'sans-serif' }}>
+        <ViewForm formId={publicFormId} onBack={() => setPublicFormId(null)} isPublic={true} />
+      </div>
+    )
   }
 
   if (user) {
