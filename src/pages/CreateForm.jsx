@@ -1,21 +1,22 @@
 import { useState } from 'react'
 import { neon } from '../lib/neon'
 
+// On met à jour les styles pour que l'aperçu corresponde au CSS
 const THEMES = [
-  { id: 'gaming', name: 'Gaming', bg: '#1a1a2e', color: '#00ffcc', font: "'Press Start 2P', monospace" },
-  { id: 'noel', name: 'Noël', bg: '#fff5f5', color: '#165b33', font: "'Mountains of Christmas', cursive" },
-  { id: 'pro', name: 'Pro moderne', bg: '#ffffff', color: '#0f172a', font: "'Inter', sans-serif" },
-  { id: 'japonais', name: 'Japonais', bg: '#fdfbf7', color: '#c0392b', font: "'Noto Serif JP', serif" },
-  { id: 'plage', name: 'Fun plage', bg: '#fda085', color: '#d84315', font: "'Pacifico', cursive" },
-  { id: 'nerd', name: 'Nerd code', bg: '#0d1117', color: '#58a6ff', font: "'Roboto Mono', monospace" },
-  { id: 'royal', name: 'Royal', bg: '#2b1b3d', color: '#f1c40f', font: "'Cinzel', serif" }
+  { id: 'gaming', name: 'Gaming', bg: '#1a1a2e', color: '#00ffcc', font: "'Press Start 2P', monospace", border: '2px solid #00ffcc' },
+  { id: 'noel', name: 'Noël', bg: '#fdf5f5', color: '#d32f2f', font: "'Mountains of Christmas', cursive", border: '3px solid #d32f2f' },
+  { id: 'pro', name: 'Pro', bg: '#ffffff', color: '#0f172a', font: "'Inter', sans-serif", border: '1px solid #cbd5e1' },
+  { id: 'japonais', name: 'Japonais', bg: '#fdfbf7', color: '#c0392b', font: "'Noto Serif JP', serif", border: '1px solid #c0392b', borderLeft: '8px solid #c0392b' },
+  { id: 'plage', name: 'Plage', bg: '#fecfef', color: '#d84315', font: "'Pacifico', cursive", border: '3px dashed #ff7043' },
+  { id: 'nerd', name: 'Nerd', bg: '#0d1117', color: '#58a6ff', font: "'Roboto Mono', monospace", border: '1px solid #30363d' },
+  { id: 'royal', name: 'Royal', bg: '#1a0f26', color: '#f1c40f', font: "'Cinzel', serif", border: '2px double #f1c40f' }
 ]
 
 const QUESTION_TYPES = [
-  { value: 'short_text', label: 'Texte court', desc: '(Nom, Email, Pseudo...)' },
-  { value: 'long_text', label: 'Texte long', desc: '(Commentaires, Avis...)' },
-  { value: 'single_choice', label: 'Choix unique', desc: '(Une seule option possible)' },
-  { value: 'multiple_choice', label: 'Choix multiple', desc: '(Plusieurs options possibles)' },
+  { value: 'short_text', label: 'Texte court', desc: '(Nom, Email...)' },
+  { value: 'long_text', label: 'Texte long', desc: '(Avis, Commentaires...)' },
+  { value: 'single_choice', label: 'Choix unique', desc: '(Une seule option)' },
+  { value: 'multiple_choice', label: 'Choix multiple', desc: '(Plusieurs options)' },
   { value: 'rating', label: 'Note (1-5)', desc: '(Étoiles)' },
   { value: 'date', label: 'Date', desc: '(Calendrier)' },
   { value: 'boolean', label: 'Oui / Non', desc: '(Vrai ou faux)' },
@@ -23,7 +24,6 @@ const QUESTION_TYPES = [
 
 const emptyQuestion = () => ({ label: '', type: 'short_text', options: '', required: false })
 
-// Fonction pour compresser l'image avant de l'envoyer dans la base
 const compressImage = (file) => {
   return new Promise((resolve) => {
     const reader = new FileReader()
@@ -39,7 +39,6 @@ const compressImage = (file) => {
         canvas.height = img.height * scaleSize
         const ctx = canvas.getContext('2d')
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        // Qualité à 70% pour réduire le poids
         resolve(canvas.toDataURL('image/jpeg', 0.7))
       }
     }
@@ -76,14 +75,7 @@ export default function CreateForm({ user, onCreated }) {
 
     const { data: formData, error: formError } = await neon
       .from('forms')
-      .insert({ 
-        creator_id: user.id, 
-        title, 
-        description, 
-        theme, 
-        image_url: image, // On sauvegarde l'image Base64
-        is_published: false 
-      })
+      .insert({ creator_id: user.id, title, description, theme, image_url: image, is_published: false })
       .select().single()
 
     if (formError) { setSaving(false); setMessage(`Erreur formulaire : ${formError.message}`); return }
@@ -112,7 +104,6 @@ export default function CreateForm({ user, onCreated }) {
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         
-        {/* --- SECTION 1 : INFOS GÉNÉRALES --- */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <label style={{ color: 'var(--text)', fontWeight: 'bold', fontSize: '1.1rem' }}>
             Titre du formulaire *
@@ -123,7 +114,6 @@ export default function CreateForm({ user, onCreated }) {
             <textarea className="input" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Explique brièvement le but de ce formulaire..." />
           </label>
 
-          {/* Upload d'image */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <span style={{ color: 'var(--text)', fontWeight: 'bold' }}>Image d'illustration (optionnel)</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -141,7 +131,6 @@ export default function CreateForm({ user, onCreated }) {
           </div>
         </div>
 
-        {/* --- SECTION 2 : THÈMES --- */}
         <div>
           <h3 style={{ color: 'var(--text)', borderBottom: '2px solid var(--text)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Choisir un thème visuel</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
@@ -151,28 +140,35 @@ export default function CreateForm({ user, onCreated }) {
                 onClick={() => setTheme(t.id)}
                 style={{
                   cursor: 'pointer',
-                  border: theme === t.id ? '4px solid var(--primary)' : 'var(--border)',
+                  border: theme === t.id ? '4px solid var(--primary)' : '1px solid #888',
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  boxShadow: theme === t.id ? '0 0 10px var(--primary)' : 'none',
-                  transition: 'all 0.2s'
+                  boxShadow: theme === t.id ? '0 0 15px var(--primary)' : 'none',
+                  transition: 'all 0.2s',
+                  transform: theme === t.id ? 'scale(1.05)' : 'scale(1)'
                 }}
               >
-                {/* Mini aperçu du thème */}
-                <div style={{ backgroundColor: t.bg, padding: '1rem', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ color: t.color, fontFamily: t.font, fontWeight: 'bold', fontSize: '0.9rem', textAlign: 'center' }}>
+                <div style={{ 
+                  backgroundColor: t.bg, 
+                  padding: '1.5rem 0.5rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  border: t.border,
+                  borderLeft: t.borderLeft || t.border,
+                  borderRight: t.id === 'japonais' ? 'none' : t.border,
+                  borderTop: t.id === 'japonais' ? 'none' : t.border,
+                  borderBottom: t.id === 'japonais' ? 'none' : t.border,
+                }}>
+                  <span style={{ color: t.color, fontFamily: t.font, fontWeight: 'bold', fontSize: '1rem', textAlign: 'center' }}>
                     {t.name}
                   </span>
-                </div>
-                <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.5rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text)' }}>
-                  {t.name}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* --- SECTION 3 : QUESTIONS --- */}
         <div>
           <h3 style={{ color: 'var(--text)', borderBottom: '2px solid var(--text)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Questions</h3>
           
@@ -221,7 +217,6 @@ export default function CreateForm({ user, onCreated }) {
           </button>
         </div>
 
-        {/* --- BOUTON FINAL --- */}
         <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '1rem', fontSize: '1.2rem', marginTop: '1rem' }}>
           {saving ? 'Création en cours…' : 'Créer le formulaire 🚀'}
         </button>

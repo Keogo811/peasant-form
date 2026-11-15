@@ -1,137 +1,147 @@
-/* Importation de polices sympas depuis Google Fonts (gratuit) */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Mountains+of+Christmas:wght@700&family=Inter:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Pacifico&family=Roboto+Mono:wght@400;700&family=Cinzel:wght@400;700&display=swap');
-
 /* Base commune à tous les formulaires publics */
 .public-form {
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
   max-width: 700px;
   margin: 2rem auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
+/* On cible les éléments de formulaire pour une meilleure lisibilité de base */
 .public-form input, 
 .public-form textarea, 
 .public-form select {
   width: 100%;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
   margin-top: 0.5rem;
   font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
 .public-form button[type="submit"] {
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 8px;
   border: none;
   font-weight: bold;
+  font-size: 1.1rem;
   cursor: pointer;
   font-family: inherit;
-  transition: transform 0.1s;
+  transition: transform 0.1s, opacity 0.2s;
+  margin-top: 1rem;
 }
-
-.public-form button[type="submit"]:active {
-  transform: scale(0.98);
-}
+.public-form button[type="submit"]:active { transform: scale(0.98); }
 
 /* =========================================
-   LES 7 THÈMES
+   1. GAMING
    ========================================= */
-
-/* 1. Gaming */
 .theme-gaming {
   background: #1a1a2e;
+  background-image: linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
   color: #00ffcc;
   border: 2px solid #00ffcc;
   font-family: 'Press Start 2P', monospace;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
 }
-.theme-gaming h2, .theme-gaming p { color: #00ffcc; }
+.theme-gaming h2 { font-size: 1.5rem; text-shadow: 2px 2px 0 #ff0055; margin-bottom: 1rem; line-height: 1.4; }
 .theme-gaming input, .theme-gaming textarea, .theme-gaming select {
-  background: #16213e; color: #fff; border: 1px solid #00ffcc;
+  background: #0f0f1a; color: #00ffcc; border: 2px solid #00ffcc; box-shadow: inset 0 0 5px rgba(0,255,204,0.2);
 }
-.theme-gaming button[type="submit"] {
-  background: #00ffcc; color: #1a1a2e;
-}
+.theme-gaming input:focus { outline: none; box-shadow: 0 0 10px #00ffcc; }
+.theme-gaming button[type="submit"] { background: #00ffcc; color: #1a1a2e; text-transform: uppercase; border: 2px solid #00ffcc; }
 
-/* 2. Noël */
+/* =========================================
+   2. NOËL
+   ========================================= */
 .theme-noel {
-  background: #fff5f5;
-  color: #165b33;
-  border: 2px solid #165b33;
+  background: #fdf5f5;
+  background-image: radial-gradient(#d32f2f 1px, transparent 1px), radial-gradient(#2e7d32 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+  color: #2e7d32;
+  border: 3px solid #d32f2f;
+  border-radius: 20px;
   font-family: 'Mountains of Christmas', cursive;
 }
-.theme-noel h2 { color: #bb2528; font-size: 2rem; }
-.theme-noel button[type="submit"] {
-  background: #bb2528; color: white;
-}
+.theme-noel h2 { color: #d32f2f; font-size: 2.5rem; text-align: center; }
+.theme-noel input, .theme-noel textarea, .theme-noel select { background: white; border: 2px solid #2e7d32; color: #1a1a1a; border-radius: 12px; }
+.theme-noel button[type="submit"] { background: #d32f2f; color: white; border-radius: 12px; font-size: 1.3rem; }
 
-/* 3. Pro moderne */
+/* =========================================
+   3. PRO MODERNE
+   ========================================= */
 .theme-pro {
   background: #ffffff;
-  color: #333333;
-  border: 1px solid #e0e0e0;
+  color: #334155;
+  border: 1px solid #e2e8f0;
   font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
-.theme-pro h2 { color: #0f172a; }
-.theme-pro button[type="submit"] {
-  background: #0f172a; color: white;
-}
+.theme-pro h2 { color: #0f172a; font-weight: 700; margin-bottom: 0.5rem; }
+.theme-pro p { color: #64748b; }
+.theme-pro input, .theme-pro textarea, .theme-pro select { background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; }
+.theme-pro input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+.theme-pro button[type="submit"] { background: #0f172a; color: white; border-radius: 6px; }
 
-/* 4. Japonais */
+/* =========================================
+   4. JAPONAIS
+   ========================================= */
 .theme-japonais {
   background: #fdfbf7;
+  background-image: linear-gradient(90deg, transparent 95%, #e0dcd3 95%), linear-gradient(transparent 95%, #e0dcd3 95%);
+  background-size: 20px 20px; /* Effet papier grille */
   color: #2c3e50;
-  border-left: 8px solid #c0392b;
+  border-left: 10px solid #c0392b;
   font-family: 'Noto Serif JP', serif;
+  box-shadow: 5px 5px 0 rgba(192, 57, 43, 0.2);
 }
-.theme-japonais h2 { color: #c0392b; }
-.theme-japonais button[type="submit"] {
-  background: #c0392b; color: white;
-}
+.theme-japonais h2 { color: #c0392b; font-size: 2rem; font-weight: 700; }
+.theme-japonais input, .theme-japonais textarea, .theme-japonais select { background: transparent; border: 1px solid #c0392b; border-radius: 0; color: #1a1a1a; border-bottom: 2px solid #c0392b; }
+.theme-japonais button[type="submit"] { background: #c0392b; color: white; border-radius: 0; font-weight: bold; }
 
-/* 5. Fun plage */
+/* =========================================
+   5. FUN PLAGE
+   ========================================= */
 .theme-plage {
-  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-  color: #5d4037;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+  color: #d84315;
+  border-radius: 30px;
   font-family: 'Pacifico', cursive;
+  border: 4px dashed #ff7043;
 }
-.theme-plage h2 { color: #d84315; }
-.theme-plage input, .theme-plage textarea {
-  border: none; background: rgba(255,255,255,0.8);
-}
-.theme-plage button[type="submit"] {
-  background: #ff7043; color: white;
-}
+.theme-plage h2 { color: #e64a19; font-size: 2.5rem; text-align: center; text-shadow: 1px 1px 0 white; }
+.theme-plage input, .theme-plage textarea, .theme-plage select { background: rgba(255, 255, 255, 0.9); border: none; border-radius: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); color: #333; }
+.theme-plage button[type="submit"] { background: #ff7043; color: white; border-radius: 30px; box-shadow: 0 4px 0 #d84315; }
 
-/* 6. Nerd code */
+/* =========================================
+   6. NERD CODE
+   ========================================= */
 .theme-nerd {
   background: #0d1117;
   color: #c9d1d9;
   border: 1px solid #30363d;
   font-family: 'Roboto Mono', monospace;
+  box-shadow: inset 0 0 20px rgba(88, 166, 255, 0.1);
 }
-.theme-nerd h2 { color: #58a6ff; }
-.theme-nerd input, .theme-nerd textarea, .theme-nerd select {
-  background: #010409; color: #c9d1d9; border: 1px solid #30363d;
-}
-.theme-nerd button[type="submit"] {
-  background: #238636; color: white;
-}
+.theme-nerd h2 { color: #58a6ff; font-size: 1.8rem; }
+.theme-nerd h2::before { content: "> "; color: #3fb950; }
+.theme-nerd input, .theme-nerd textarea, .theme-nerd select { background: #010409; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; font-family: inherit; }
+.theme-nerd input:focus { border-color: #58a6ff; outline: none; }
+.theme-nerd button[type="submit"] { background: #238636; color: #ffffff; border-radius: 4px; border: 1px solid rgba(240,246,252,0.1); }
 
-/* 7. Royal */
+/* =========================================
+   7. ROYAL
+   ========================================= */
 .theme-royal {
-  background: #2b1b3d;
+  background: #1a0f26;
+  background-image: radial-gradient(circle at 50% 0%, #3b1b54 0%, #1a0f26 70%);
   color: #f1c40f;
-  border: 2px solid #f1c40f;
+  border: 3px double #f1c40f;
   font-family: 'Cinzel', serif;
 }
-.theme-royal h2 { color: #f1c40f; }
-.theme-royal input, .theme-royal textarea, .theme-royal select {
-  background: #1a0f26; color: #fff; border: 1px solid #f1c40f;
-}
-.theme-royal button[type="submit"] {
-  background: #f1c40f; color: #2b1b3d;
-}
+.theme-royal h2 { color: #f1c40f; text-transform: uppercase; text-align: center; letter-spacing: 2px; }
+.theme-royal input, .theme-royal textarea, .theme-royal select { background: #0d0714; color: #f1c40f; border: 1px solid #f1c40f; border-radius: 0; }
+.theme-royal button[type="submit"] { background: #f1c40f; color: #1a0f26; border-radius: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
