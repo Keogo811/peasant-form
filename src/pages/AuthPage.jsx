@@ -15,16 +15,13 @@ export default function AuthPage({ onSuccess }) {
       <div className="bg-light" style={{ width: '450px', height: '450px', background: '#a29bfe', bottom: '10%', left: '20%', animationDelay: '-11s' }}></div>
       <div className="bg-light" style={{ width: '300px', height: '300px', background: '#fd79a8', top: '60%', right: '20%', animationDelay: '-5s' }}></div>
 
-      {/* --- ARRIÈRE-PLAN : EMOJIS FLOTTANTS (TAILLES VARIÉES) --- */}
-      {/* Côté Gauche */}
+      {/* --- ARRIÈRE-PLAN : EMOJIS FLOTTANTS --- */}
       <div className="floating-emoji" style={{ fontSize: '7rem', left: '2%', top: '10%', animationDelay: '0s' }}>🚀</div>
       <div className="floating-emoji" style={{ fontSize: '2rem', left: '15%', top: '25%', animationDelay: '-1s' }}>🎨</div>
-      <div className="floating-emoji" style={{ fontSize: '4.5rem', left: '15%', bottom: '15%', animationDelay: '-2s' }}>👾</div>
-      <div className="floating-emoji" style={{ fontSize: '6rem', left: '5%', top: '55%', animationDelay: '-3s' }}>🕹️</div>
-      <div className="floating-emoji" style={{ fontSize: '6rem', left: '3%', bottom: '-2%', animationDelay: '-4s' }}>🍕</div>
+      <div className="floating-emoji" style={{ fontSize: '4.5rem', left: '25%', bottom: '15%', animationDelay: '-2s' }}>👾</div>
+      <div className="floating-emoji" style={{ fontSize: '3rem', left: '5%', top: '55%', animationDelay: '-3s' }}>🕹️</div>
+      <div className="floating-emoji" style={{ fontSize: '6rem', left: '8%', bottom: '-2%', animationDelay: '-4s' }}>🍕</div>
       <div className="floating-emoji" style={{ fontSize: '2.5rem', left: '30%', top: '45%', animationDelay: '-5s' }}>💡</div>
-
-      {/* Côté Droit */}
       <div className="floating-emoji" style={{ fontSize: '5.5rem', right: '3%', top: '15%', animationDelay: '-1s' }}>✨</div>
       <div className="floating-emoji" style={{ fontSize: '2rem', right: '20%', top: '30%', animationDelay: '-2s' }}>🍩</div>
       <div className="floating-emoji" style={{ fontSize: '7rem', right: '-2%', bottom: '10%', animationDelay: '-3s' }}>🪩</div>
@@ -40,16 +37,16 @@ export default function AuthPage({ onSuccess }) {
           fontSize: '4rem', 
           fontWeight: '900', 
           lineHeight: '1', 
-          color: '#fff', 
-          WebkitTextStroke: '3px #1a1a1a', 
-          textShadow: '6px 6px 0px var(--primary), 8px 8px 0px #1a1a1a',
+          color: 'var(--card-bg)', 
+          WebkitTextStroke: '3px var(--text)', 
+          textShadow: '6px 6px 0px var(--primary), 8px 8px 0px var(--text)',
           marginBottom: '1.5rem',
           letterSpacing: '-2px'
         }}>
           Peasant Form
         </h1>
 
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem', fontWeight: 'bold', fontSize: '1.2rem', color: '#1a1a1a' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--text)' }}>
           Marre de Google Forms ? Reprends le contrôle. 🤘
           <br/>
           <span style={{ fontSize: '1rem', fontWeight: 'normal', display: 'block', marginTop: '0.5rem' }}>
@@ -61,12 +58,12 @@ export default function AuthPage({ onSuccess }) {
           <div style={{ 
             marginBottom: '2rem', 
             fontSize: '0.9rem', 
-            color: '#1a1a1a', 
+            color: 'var(--text)', 
             backgroundColor: 'var(--accent)', 
             padding: '1rem', 
             borderRadius: '4px', 
-            border: '2px solid #1a1a1a',
-            boxShadow: '2px 2px 0px #1a1a1a'
+            border: 'var(--border)',
+            boxShadow: '2px 2px 0px var(--text)'
           }}>
             💡 <strong>Pourquoi se connecter ?</strong>
             <br/>
@@ -78,13 +75,12 @@ export default function AuthPage({ onSuccess }) {
             <button className={`btn ${view === 'signup' ? 'btn-primary' : ''}`} style={{ flex: 1 }} onClick={() => setView('signup')}>Inscription</button>
           </div>
 
-          <div style={{ color: '#1a1a1a' }}>
+          <div>
             {view === 'signin' ? <SignIn onSuccess={onSuccess} /> : <SignUp />}
           </div>
         </div>
       </div>
 
-      {/* --- NOTICE BAS GAUCHE --- */}
       <div className="footer-credit">
         Made by Keogo · <a href="#" onClick={(e) => e.preventDefault()}>Mon lien</a>
       </div>

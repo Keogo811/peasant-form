@@ -35,18 +35,19 @@ export default function MyForms({ onViewForm, onViewDashboard }) {
         {forms.map((f) => (
           <div key={f.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{f.title}</h3>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text)' }}>{f.title}</h3>
               <span style={{ 
-                fontSize: '0.8em', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #1a1a1a',
-                backgroundColor: f.is_published ? 'var(--secondary)' : '#eee',
-                color: f.is_published ? 'white' : '#666'
+                fontSize: '0.8em', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid var(--text)',
+                backgroundColor: f.is_published ? 'var(--secondary)' : 'var(--bg)',
+                color: f.is_published ? 'white' : 'var(--text)'
               }}>
                 {f.is_published ? 'En ligne' : 'Brouillon'}
               </span>
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
-              <button className="btn" onClick={() => onViewDashboard(f.id)} style={{ flex: 1, backgroundColor: '#1a1a1a', color: 'white' }}>Résultats</button>
+              {/* Utilisation de btn-inverse ici */}
+              <button className="btn btn-inverse" onClick={() => onViewDashboard(f.id)} style={{ flex: 1 }}>Résultats</button>
               <button className="btn" onClick={() => onViewForm(f.id)}>Voir</button>
               
               <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>

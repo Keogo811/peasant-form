@@ -35,55 +35,31 @@ export default function CreateForm({ user, onCreated }) {
     setQuestions((qs) => qs.map((q, i) => (i === index ? { ...q, ...patch } : q)))
   }
   function addQuestion() { setQuestions((qs) => [...qs, emptyQuestion()]) }
-  function removeQuestion(index) {
-    setQuestions((qs) => qs.filter((_, i) => i !== index))
-  }
+  function removeQuestion(index) { setQuestions((qs) => qs.filter((_, i) => i !== index)) }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
     setMessage('')
 
-    // 1. Insérer le formulaire
     const { data: formData, error: formError } = await neon
       .from('forms')
-      .insert({
-        creator_id: user.id,
-        title,
-        description,
-        theme,
-        is_published: false,
-      })
-      .select()
-      .single()
+      .insert({ creator_id: user.id, title, description, theme, is_published: false })
+      .select().single()
 
-    if (formError) {
-      setSaving(false)
-      setMessage(`Erreur formulaire : ${formError.message}`)
-      return
-    }
+    if (formError) { setSaving(false); setMessage(`Erreur formulaire : ${formError.message}`); return }
 
-    // 2. Insérer les questions
     const questionsToInsert = questions
       .filter((q) => q.label.trim() !== '')
       .map((q, i) => ({
-        form_id: formData.id,
-        label: q.label,
-        type: q.type,
-        options: q.options
-          ? q.options.split(',').map((s) => s.trim()).filter(Boolean)
-          : null,
-        required: q.required,
-        position: i,
+        form_id: formData.id, label: q.label, type: q.type,
+        options: q.options ? q.options.split(',').map((s) => s.trim()).filter(Boolean) : null,
+        required: q.required, position: i,
       }))
 
     if (questionsToInsert.length > 0) {
       const { error: qError } = await neon.from('questions').insert(questionsToInsert)
-      if (qError) {
-        setSaving(false)
-        setMessage(`Formulaire créé, mais erreurs sur les questions : ${qError.message}`)
-        return
-      }
+      if (qError) { setSaving(false); setMessage(`Formulaire créé, mais erreurs questions : ${qError.message}`); return }
     }
 
     setSaving(false)
@@ -92,86 +68,56 @@ export default function CreateForm({ user, onCreated }) {
   }
 
   return (
-    <div style={{ marginTop: '2rem' }}>
-      <h2>Créer un formulaire</h2>
+    <div className="card">
+      <h2 style={{ marginTop: 0, color: 'var(--text)' }}>Créer un formulaire</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <label>
+        <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
           Titre
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required />
         </label>
-        <label>
+        <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
           Description
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+          <textarea className="input" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
         </label>
-        <label>
+        <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
           Thème
-          <select value={theme} onChange={(e) => setTheme(e.target.value)} style={{ width: '100%', padding: '0.5rem' }}>
+          <select className="input" value={theme} onChange={(e) => setTheme(e.target.value)}>
             {THEMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </label>
 
-        <h3>Questions</h3>
+        <h3 style={{ color: 'var(--text)', marginBottom: 0 }}>Questions</h3>
         {questions.map((q, i) => (
-          <div key={i} style={{ border: '1px solid #ddd', borderRadius: 6, padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label>
+          <div key={i} style={{ border: 'var(--border)', borderRadius: 6, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: 'var(--bg)' }}>
+            <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
               Libellé
-              <input
-                value={q.label}
-                onChange={(e) => updateQuestion(i, { label: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem' }}
-                required
-              />
+              <input className="input" value={q.label} onChange={(e) => updateQuestion(i, { label: e.target.value })} required />
             </label>
-            <label>
+            <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
               Type
-              <select
-                value={q.type}
-                onChange={(e) => updateQuestion(i, { type: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem' }}
-              >
+              <select className="input" value={q.type} onChange={(e) => updateQuestion(i, { type: e.target.value })}>
                 {QUESTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </label>
             {(q.type === 'single_choice' || q.type === 'multiple_choice') && (
-              <label>
-                Options (séparées par des virgules)
-                <input
-                  value={q.options}
-                  onChange={(e) => updateQuestion(i, { options: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem' }}
-                  placeholder="Rouge, Bleu, Vert"
-                />
+              <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
+                Options (séparées par virgules)
+                <input className="input" value={q.options} onChange={(e) => updateQuestion(i, { options: e.target.value })} placeholder="Rouge, Bleu, Vert" />
               </label>
             )}
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                checked={q.required}
-                onChange={(e) => updateQuestion(i, { required: e.target.checked })}
-              />
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)' }}>
+              <input type="checkbox" checked={q.required} onChange={(e) => updateQuestion(i, { required: e.target.checked })} style={{ width: 'auto', margin: 0 }} />
               Obligatoire
             </label>
-            <button type="button" onClick={() => removeQuestion(i)} disabled={questions.length === 1}>
-              Supprimer cette question
-            </button>
+            <button type="button" className="btn" onClick={() => removeQuestion(i)} disabled={questions.length === 1}>Supprimer</button>
           </div>
         ))}
-        <button type="button" onClick={addQuestion}>+ Ajouter une question</button>
-        <button type="submit" disabled={saving} style={{ padding: '0.75rem', fontWeight: 'bold' }}>
+        <button type="button" className="btn" onClick={addQuestion}>+ Ajouter une question</button>
+        <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '0.75rem', fontSize: '1.1rem' }}>
           {saving ? 'Enregistrement…' : 'Créer le formulaire'}
         </button>
       </form>
-      {message && <p style={{ marginTop: '1rem' }}>{message}</p>}
+      {message && <p style={{ marginTop: '1rem', fontWeight: 'bold', color: 'var(--primary)' }}>{message}</p>}
     </div>
   )
 }

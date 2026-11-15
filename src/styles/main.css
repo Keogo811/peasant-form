@@ -28,13 +28,17 @@ body {
   transition: all 0.1s;
   border-radius: 4px;
   font-family: inherit;
-  color: var(--text);
+  color: var(--text); /* Le texte prend la couleur du thème */
 }
 .btn:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0px #1a1a1a;
 }
 .btn-primary { background: var(--primary); color: white; }
+.btn-inverse {
+  background: var(--text);
+  color: var(--bg);
+}
 .btn-secondary { background: var(--secondary); color: white; }
 .btn-accent { background: var(--accent); }
 
@@ -122,7 +126,7 @@ body {
   position: fixed;
   bottom: 1rem;
   left: 1rem;
-  background: white;
+  background: var(--card-bg); /* <-- Changé ici */
   border: var(--border);
   box-shadow: var(--shadow);
   padding: 0.5rem 1rem;
@@ -130,6 +134,7 @@ body {
   font-weight: bold;
   z-index: 50;
   font-size: 0.9rem;
+  color: var(--text); /* <-- Ajouté pour être sûr */
 }
 
 .footer-credit a {
@@ -148,10 +153,6 @@ body {
   --card-bg: #2a2a2a;
   --border: 2px solid #f4f1ea;
   --shadow: 4px 4px 0px #f4f1ea;
-}
-
-[data-theme="dark"] .btn {
-  color: #1a1a1a;
 }
 
 /* Le bouton flottant */

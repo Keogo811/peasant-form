@@ -19,10 +19,10 @@ export default function SignIn({ onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-      <label style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Email</label>
+      <label style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text)' }}>Email</label>
       <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required />
       
-      <label style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Mot de passe</label>
+      <label style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text)' }}>Mot de passe</label>
       <input type="password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} required />
       
       <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: '1rem', padding: '0.75rem' }}>

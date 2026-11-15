@@ -23,31 +23,33 @@ export default function SettingsPanel() {
         {isOpen ? '✖' : '⚙️'}
       </button>
 
+// ... (le début du fichier reste identique)
+
       {isOpen && (
         <div className="settings-panel">
-          <h3 style={{ margin: '0 0 1rem 0' }}>Paramètres</h3>
+          <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text)' }}>Paramètres</h3>
 
           <div className="settings-section">
-            <h4>Thème</h4>
+            <h4 style={{ color: 'var(--text)' }}>Thème</h4>
             <button className={`option-btn ${theme === 'light' ? 'active' : ''}`} onClick={() => setTheme('light')}>☀️ Clair</button>
             <button className={`option-btn ${theme === 'dark' ? 'active' : ''}`} onClick={() => setTheme('dark')}>🌙 Sombre</button>
           </div>
 
           <div className="settings-section">
-            <h4>Taille du texte</h4>
+            <h4 style={{ color: 'var(--text)' }}>Taille du texte</h4>
             <button className={`option-btn ${fontSize === '14px' ? 'active' : ''}`} onClick={() => setFontSize('14px')}>Petit</button>
             <button className={`option-btn ${fontSize === '16px' ? 'active' : ''}`} onClick={() => setFontSize('16px')}>Normal</button>
             <button className={`option-btn ${fontSize === '18px' ? 'active' : ''}`} onClick={() => setFontSize('18px')}>Grand</button>
           </div>
 
           <div className="settings-section">
-            <h4>Couleur d'accent</h4>
+            <h4 style={{ color: 'var(--text)' }}>Couleur d'accent</h4>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
               {['#ff6b6b', '#4ecdc4', '#a29bfe', '#ffe66d', '#1a1a1a'].map(c => (
                 <div 
                   key={c}
                   className="color-circle" 
-                  style={{ backgroundColor: c, transform: accent === c ? 'scale(1.3)' : 'scale(1)' }}
+                  style={{ backgroundColor: c, transform: accent === c ? 'scale(1.3)' : 'scale(1)', borderColor: 'var(--text)' }}
                   onClick={() => setAccent(c)}
                 />
               ))}
