@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { neon } from '../lib/neon'
 
-// On met à jour les styles pour que l'aperçu corresponde au CSS
 const THEMES = [
   { id: 'gaming', name: 'Gaming', bg: '#1a1a2e', color: '#00ffcc', font: "'Press Start 2P', monospace", border: '2px solid #00ffcc' },
   { id: 'noel', name: 'Noël', bg: '#fdf5f5', color: '#d32f2f', font: "'Mountains of Christmas', cursive", border: '3px solid #d32f2f' },
   { id: 'pro', name: 'Pro', bg: '#ffffff', color: '#0f172a', font: "'Inter', sans-serif", border: '1px solid #cbd5e1' },
-  { id: 'japonais', name: 'Japonais', bg: '#fdfbf7', color: '#c0392b', font: "'Noto Serif JP', serif", border: '1px solid #c0392b', borderLeft: '8px solid #c0392b' },
+  // Nouvel aperçu Japonais (Rouge et blanc)
+  { id: 'japonais', name: 'Japonais', bg: '#fdfbf7', color: '#c0392b', font: "'Noto Serif JP', serif", border: '2px solid #c0392b' },
   { id: 'plage', name: 'Plage', bg: '#fecfef', color: '#d84315', font: "'Pacifico', cursive", border: '3px dashed #ff7043' },
   { id: 'nerd', name: 'Nerd', bg: '#0d1117', color: '#58a6ff', font: "'Roboto Mono', monospace", border: '1px solid #30363d' },
-  { id: 'royal', name: 'Royal', bg: '#1a0f26', color: '#f1c40f', font: "'Cinzel', serif", border: '2px double #f1c40f' }
+  // Nouvel aperçu Royal (Ivoire et Or)
+  { id: 'royal', name: 'Royal', bg: '#fdfbf7', color: '#4a0e4e', font: "'Cinzel', serif", border: '2px solid #d4af37' }
 ]
 
 const QUESTION_TYPES = [

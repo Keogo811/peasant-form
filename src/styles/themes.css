@@ -99,20 +99,71 @@
 .theme-pro button[type="submit"] { background: #0f172a; color: white; border-radius: 6px; }
 
 /* =========================================
-   4. JAPONAIS (Vagues de Seigaiha)
+   4. JAPONAIS (Torii et Rayons de soleil diffus)
    ========================================= */
 .theme-japonais {
-  background: #fdfbf7;
+  background-color: #fdfbf7; /* Papier de riz */
   color: #2c3e50;
   border-left: 10px solid #c0392b;
   font-family: 'Noto Serif JP', serif;
   box-shadow: 5px 5px 0 rgba(192, 57, 43, 0.2);
-  /* Motif de vagues japonaises (Seigaiha) */
-  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c0392b' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M0 40a20 20 0 1 1 40 0H0zM20 0a20 20 0 1 1 0 40V0z'/%3E%3C/g%3E%3C/svg%3E");
+  position: relative;
+  overflow: hidden;
+  padding-top: 90px; 
+  
+  /* Les rayons de soleil qui partent du haut et s'estompent vers le bas */
+  background-image: 
+    /* Le fondu vers le bas pour effacer les rayons */
+    linear-gradient(to bottom, rgba(253, 251, 247, 0) 0%, rgba(253, 251, 247, 0.8) 40%, rgba(253, 251, 247, 1) 70%),
+    /* Les rayons rouges très pâles */
+    repeating-conic-gradient(from 0deg at 50% 0%, rgba(192, 57, 43, 0.08) 0deg 10deg, transparent 10deg 20deg);
+  background-size: 100% 100%, 100% 100%;
+  background-position: center top, center top;
 }
-.theme-japonais h2 { color: #c0392b; font-size: 2rem; font-weight: 700; border-bottom: 2px solid #c0392b; padding-bottom: 0.5rem; }
-.theme-japonais input, .theme-japonais textarea, .theme-japonais select { background: rgba(255, 255, 255, 0.8); border: 1px solid #c0392b; border-radius: 0; color: #1a1a1a; }
-.theme-japonais button[type="submit"] { background: #c0392b; color: white; border-radius: 0; font-weight: bold; }
+
+/* Torii (Portail Japonais) centré en haut */
+.theme-japonais::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 55px;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10,10 L90,10 L85,25 L15,25 Z M25,25 L35,25 L35,90 L25,90 Z M65,25 L75,25 L75,90 L65,90 Z M15,35 L85,35 L85,45 L15,45 Z' fill='%23c0392b' fill-opacity='0.9'/%3E%3C/svg%3E") no-repeat center;
+  background-size: contain;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.theme-japonais h2 {
+  color: #c0392b;
+  font-size: 2rem;
+  font-weight: 700;
+  border-bottom: 2px solid #c0392b;
+  padding-bottom: 0.5rem;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.theme-japonais input, .theme-japonais textarea, .theme-japonais select {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #c0392b;
+  border-radius: 0;
+  color: #1a1a1a;
+  position: relative;
+  z-index: 2;
+}
+
+.theme-japonais button[type="submit"] {
+  background: #c0392b;
+  color: white;
+  border-radius: 0;
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+}
 
 /* =========================================
    5. FUN PLAGE (Vagues et soleil)
@@ -157,20 +208,49 @@
 .theme-nerd button[type="submit"]:hover { background: #2ea043; }
 
 /* =========================================
-   7. ROYAL (Dorures et damassé)
+   7. ROYAL (Byzantin / Romain : Pourpre, Ivoire et Or)
    ========================================= */
 .theme-royal {
-  background: #1a0f26;
-  color: #f1c40f;
-  border: 4px double #f1c40f;
+  background-color: #fdfbf7; /* Ivoire / Parchemin */
+  color: #4a0e4e; /* Pourpre impérial byzantin */
+  border: 4px solid #d4af37; /* Or */
   font-family: 'Cinzel', serif;
-  box-shadow: 0 0 0 8px #1a0f26, 0 0 0 10px #f1c40f, 0 20px 40px rgba(0,0,0,0.5);
-  /* Motif damassé discret en fond */
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm0 20c5.523 0 10-4.477 10-10s-4.477-10-10-10-10 4.477-10 10 4.477 10 10 10z' fill='%23f1c40f' fill-opacity='0.08'/%3E%3C/svg%3E");
+  box-shadow: 
+    0 0 0 8px #fdfbf7, 
+    0 0 0 10px #d4af37, /* Double bordure effet cadre */
+    0 15px 30px rgba(74, 14, 78, 0.15);
+  /* Motif géométrique byzantin (losanges) */
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23d4af37' stroke-width='1' stroke-opacity='0.15'/%3E%3Cpath d='M30 10l20 20-20 20L10 30z' fill='none' stroke='%23d4af37' stroke-width='1' stroke-opacity='0.1'/%3E%3C/svg%3E");
   margin-top: 2rem;
   margin-bottom: 2rem;
 }
-.theme-royal h2 { color: #f1c40f; text-transform: uppercase; text-align: center; letter-spacing: 2px; font-size: 2rem; text-shadow: 2px 2px 4px #000; }
-.theme-royal input, .theme-royal textarea, .theme-royal select { background: #0d0714; color: #f1c40f; border: 1px solid #f1c40f; border-radius: 0; }
-.theme-royal button[type="submit"] { background: #f1c40f; color: #1a0f26; border-radius: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; border: 2px solid #fff; }
-.theme-royal button[type="submit"]:hover { background: #fff; color: #1a0f26; }
+.theme-royal h2 { 
+  color: #4a0e4e; 
+  text-transform: uppercase; 
+  text-align: center; 
+  letter-spacing: 3px; 
+  font-size: 2rem; 
+  border-bottom: 2px solid #d4af37; 
+  padding-bottom: 10px;
+  margin-bottom: 2rem;
+}
+.theme-royal input, .theme-royal textarea, .theme-royal select { 
+  background: #ffffff; 
+  color: #4a0e4e; 
+  border: 1px solid #d4af37; 
+  border-radius: 0; 
+  font-family: 'Inter', sans-serif; /* Texte lisible */
+}
+.theme-royal button[type="submit"] { 
+  background: #4a0e4e; 
+  color: #d4af37; 
+  border-radius: 0; 
+  text-transform: uppercase; 
+  letter-spacing: 2px; 
+  font-weight: bold; 
+  border: 1px solid #d4af37; 
+}
+.theme-royal button[type="submit"]:hover { 
+  background: #d4af37; 
+  color: #4a0e4e; 
+}
