@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Titan+One&display=swap');
+
 :root {
   --bg: #f4f1ea;
   --text: #1a1a1a;
@@ -352,4 +354,32 @@ body {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
   20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+/* =========================================
+   TITRES STYLISÉS (BULLE)
+   ========================================= */
+.app-title {
+  font-family: 'Titan One', cursive;
+  font-size: 2.5rem;
+  font-weight: normal;
+  /* Un joli dégradé de couleurs */
+  background: linear-gradient(45deg, var(--primary), #feca57, #4ecdc4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* L'effet 3D bulle (ombre douce) */
+  filter: drop-shadow(2px 2px 0px var(--text)) drop-shadow(4px 4px 0px rgba(0,0,0,0.15));
+  letter-spacing: 1px;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.app-title-large {
+  font-size: 4.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  filter: drop-shadow(3px 3px 0px var(--text)) drop-shadow(6px 6px 0px rgba(0,0,0,0.2));
+  /* Petit effet de rotation fun pour la page de connexion */
+  transform: rotate(-2deg); 
 }

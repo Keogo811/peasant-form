@@ -20,6 +20,13 @@ export default function MyForms({ onViewForm, onViewDashboard }) {
     else alert("Erreur : " + error.message)
   }
 
+  async function deleteForm(id) {
+    if (!window.confirm("Es-tu sûr de vouloir supprimer ce formulaire ? Toutes les réponses seront perdues.")) return
+    const { error } = await neon.from('forms').delete().eq('id', id)
+    if (!error) load()
+    else alert("Erreur : " + error.message)
+  }
+
   function copyLink(id) {
     const url = `${window.location.origin}${window.location.pathname}?form=${id}`
     navigator.clipboard.writeText(url)
@@ -46,7 +53,6 @@ export default function MyForms({ onViewForm, onViewDashboard }) {
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
-              {/* Utilisation de btn-inverse ici */}
               <button className="btn btn-inverse" onClick={() => onViewDashboard(f.id)} style={{ flex: 1 }}>Résultats</button>
               <button className="btn" onClick={() => onViewForm(f.id)}>Voir</button>
               
@@ -58,6 +64,14 @@ export default function MyForms({ onViewForm, onViewDashboard }) {
                   style={{ flex: 1, backgroundColor: f.is_published ? 'var(--accent)' : 'var(--primary)', color: f.is_published ? '#1a1a1a' : 'white' }}
                 >
                   {f.is_published ? 'Dépublier' : 'Publier'}
+                </button>
+                <button 
+                  onClick={() => deleteForm(f.id)} 
+                  className="btn"
+                  style={{ backgroundColor: '#ff6b6b', color: 'white', padding: '0.5rem 0.75rem' }}
+                  title="Supprimer"
+                >
+                  🗑️
                 </button>
               </div>
             </div>

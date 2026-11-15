@@ -19,9 +19,9 @@ export default function AuthPage({ onSuccess }) {
       <div className="floating-emoji" style={{ fontSize: '7rem', left: '2%', top: '10%', animationDelay: '0s' }}>🚀</div>
       <div className="floating-emoji" style={{ fontSize: '2rem', left: '15%', top: '25%', animationDelay: '-1s' }}>🎨</div>
       <div className="floating-emoji" style={{ fontSize: '4.5rem', left: '25%', bottom: '15%', animationDelay: '-2s' }}>👾</div>
-      <div className="floating-emoji" style={{ fontSize: '3rem', left: '5%', top: '55%', animationDelay: '-3s' }}>🕹️</div>
+      <div className="floating-emoji" style={{ fontSize: '5rem', left: '5%', top: '55%', animationDelay: '-3s' }}>🕹️</div>
       <div className="floating-emoji" style={{ fontSize: '6rem', left: '8%', bottom: '-2%', animationDelay: '-4s' }}>🍕</div>
-      <div className="floating-emoji" style={{ fontSize: '2.5rem', left: '30%', top: '45%', animationDelay: '-5s' }}>💡</div>
+      <div className="floating-emoji" style={{ fontSize: '3.5rem', left: '25%', top: '45%', animationDelay: '-5s' }}>💡</div>
       <div className="floating-emoji" style={{ fontSize: '5.5rem', right: '3%', top: '15%', animationDelay: '-1s' }}>✨</div>
       <div className="floating-emoji" style={{ fontSize: '2rem', right: '20%', top: '30%', animationDelay: '-2s' }}>🍩</div>
       <div className="floating-emoji" style={{ fontSize: '7rem', right: '-2%', bottom: '10%', animationDelay: '-3s' }}>🪩</div>
@@ -32,17 +32,8 @@ export default function AuthPage({ onSuccess }) {
       {/* --- CONTENU PRINCIPAL --- */}
       <div style={{ position: 'relative', zIndex: 10, maxWidth: 450, margin: '0 auto', padding: '4rem 1rem' }}>
         
-        <h1 style={{ 
-          textAlign: 'center', 
-          fontSize: '4rem', 
-          fontWeight: '900', 
-          lineHeight: '1', 
-          color: 'var(--card-bg)', 
-          WebkitTextStroke: '3px var(--text)', 
-          textShadow: '6px 6px 0px var(--primary), 8px 8px 0px var(--text)',
-          marginBottom: '1.5rem',
-          letterSpacing: '-2px'
-        }}>
+        {/* LE NOUVEAU TITRE BULLE */}
+        <h1 className="app-title app-title-large">
           Peasant Form
         </h1>
 

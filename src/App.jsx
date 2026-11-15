@@ -55,7 +55,9 @@ function App() {
       content = (
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem', position: 'relative', zIndex: 10 }}>
           <header className="app-header">
-            <h1>Peasant Form 🛠️</h1>
+            <h1 className="app-title app-title-large">
+              Peasant Form
+            </h1>
             <button className="btn" onClick={handleSignOut}>Déconnexion</button>
           </header>
           
