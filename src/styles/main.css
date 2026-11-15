@@ -1,0 +1,138 @@
+:root {
+  --bg: #f4f1ea;
+  --text: #1a1a1a;
+  --primary: #ff6b6b;
+  --secondary: #4ecdc4;
+  --accent: #ffe66d;
+  --card-bg: #ffffff;
+  --border: 2px solid #1a1a1a;
+  --shadow: 4px 4px 0px #1a1a1a;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Boutons style Néo-brutaliste */
+.btn {
+  background: var(--card-bg);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.1s;
+  border-radius: 4px;
+  font-family: inherit;
+  color: var(--text);
+}
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1a1a1a;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-secondary { background: var(--secondary); color: white; }
+.btn-accent { background: var(--accent); }
+
+/* Cartes et conteneurs */
+.card {
+  background: var(--card-bg);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+/* Champs de formulaire */
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: var(--border);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.input:focus {
+  outline: none;
+  box-shadow: 2px 2px 0px var(--secondary);
+}
+
+/* En-tête de l'app */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: var(--border);
+  margin-bottom: 2rem;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: -1px;
+}
+
+/* =========================================
+   ANIMATIONS D'ARRIÈRE-PLAN (FUN & FLOTTANT)
+   ========================================= */
+
+/* Lumières floues */
+.bg-light {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  opacity: 0.6;
+  animation: floatLight 15s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+/* Des mouvements beaucoup plus amples (300px à 400px) */
+@keyframes floatLight {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(300px, 200px) scale(1.3); }
+  100% { transform: translate(-200px, 400px) scale(0.8); }
+}
+
+/* Emojis flottants */
+.floating-emoji {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.8;
+  user-select: none;
+  pointer-events: none;
+  animation: floatEmoji 6s infinite alternate ease-in-out;
+}
+
+@keyframes floatEmoji {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-40px) rotate(15deg); }
+  100% { transform: translateY(20px) rotate(-15deg); }
+}
+
+/* Footer "Made by Keogo" - Fixé pour rester visible au scroll */
+.footer-credit {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  background: white;
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 50;
+  font-size: 0.9rem;
+}
+
+.footer-credit a {
+  color: var(--primary);
+  text-decoration: underline;
+}

@@ -12,9 +12,7 @@ export default function MyForms({ onViewForm, onViewDashboard }) {
     setLoading(false)
   }
 
-  useEffect(() => {
-    load()
-  }, [])
+  useEffect(() => { load() }, [])
 
   async function togglePublish(id, currentStatus) {
     const { error } = await neon.from('forms').update({ is_published: !currentStatus }).eq('id', id)
@@ -25,43 +23,46 @@ export default function MyForms({ onViewForm, onViewDashboard }) {
   function copyLink(id) {
     const url = `${window.location.origin}${window.location.pathname}?form=${id}`
     navigator.clipboard.writeText(url)
-    alert("Lien copié dans le presse-papiers !\n\n" + url)
+    alert("Lien copié !\n\n" + url)
   }
 
   if (loading) return <p>Chargement…</p>
 
   return (
-    <div style={{ marginTop: '2rem' }}>
-      <h2>Mes formulaires</h2>
-      {forms.length === 0 && <p>Aucun formulaire pour l'instant.</p>}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+    <div>
+      {forms.length === 0 && <p>Aucun formulaire pour l'instant. Crée le premier !</p>}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
         {forms.map((f) => (
-          <li key={f.id} style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: 8, marginBottom: '1rem', backgroundColor: '#fff' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <strong>{f.title}</strong>
-              <em style={{ color: f.is_published ? '#28a745' : '#888' }}>
+          <div key={f.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{f.title}</h3>
+              <span style={{ 
+                fontSize: '0.8em', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #1a1a1a',
+                backgroundColor: f.is_published ? 'var(--secondary)' : '#eee',
+                color: f.is_published ? 'white' : '#666'
+              }}>
                 {f.is_published ? 'En ligne' : 'Brouillon'}
-              </em>
+              </span>
             </div>
             
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button onClick={() => onViewForm(f.id)} style={{ padding: '0.25rem 0.5rem' }}>Voir / Répondre</button>
-              <button onClick={() => onViewDashboard(f.id)} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#12234A', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Résultats</button>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
+              <button className="btn" onClick={() => onViewDashboard(f.id)} style={{ flex: 1, backgroundColor: '#1a1a1a', color: 'white' }}>Résultats</button>
+              <button className="btn" onClick={() => onViewForm(f.id)}>Voir</button>
               
-              <button onClick={() => copyLink(f.id)} style={{ padding: '0.25rem 0.5rem', marginLeft: 'auto', backgroundColor: '#f4f4f4' }}>
-                Copier le lien
-              </button>
-              
-              <button 
-                onClick={() => togglePublish(f.id, f.is_published)} 
-                style={{ padding: '0.25rem 0.5rem', backgroundColor: f.is_published ? '#dc3545' : '#28a745', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-              >
-                {f.is_published ? 'Dépublier' : 'Publier'}
-              </button>
+              <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button className="btn" onClick={() => copyLink(f.id)} style={{ flex: 1 }}>Lien</button>
+                <button 
+                  onClick={() => togglePublish(f.id, f.is_published)} 
+                  className="btn"
+                  style={{ flex: 1, backgroundColor: f.is_published ? 'var(--accent)' : 'var(--primary)', color: f.is_published ? '#1a1a1a' : 'white' }}
+                >
+                  {f.is_published ? 'Dépublier' : 'Publier'}
+                </button>
+              </div>
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
