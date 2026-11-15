@@ -186,6 +186,8 @@ body {
   bottom: 6rem;
   right: 1.5rem;
   width: 300px;
+  max-height: 75vh; /* Ne dépasse pas 75% de la hauteur de l'écran */
+  overflow-y: auto; /* Ajoute une barre de scroll si besoin */
   background: var(--card-bg);
   border: var(--border);
   box-shadow: var(--shadow);
@@ -239,4 +241,115 @@ body {
   cursor: pointer;
   display: inline-block;
   margin-right: 0.5rem;
+}
+
+/* =========================================
+   ARRIÈRE-PLAN SAISONNIER
+   ========================================= */
+.seasonal-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Hiver : Neige (Lente et droite) */
+.snowflake {
+  position: absolute;
+  top: -10px;
+  opacity: 0.7;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to { transform: translateY(105vh); }
+}
+
+/* Printemps / Automne : Feuilles et Pétales (Moyen avec balancement) */
+.floating-nature {
+  position: absolute;
+  top: -10px;
+  opacity: 0.8;
+  animation: fallSway linear infinite;
+}
+@keyframes fallSway {
+  0% { transform: translateY(-10px) translateX(0) rotate(0deg); }
+  25% { transform: translateY(25vh) translateX(30px) rotate(90deg); }
+  50% { transform: translateY(50vh) translateX(-30px) rotate(180deg); }
+  75% { transform: translateY(75vh) translateX(30px) rotate(270deg); }
+  100% { transform: translateY(105vh) translateX(0) rotate(360deg); }
+}
+
+/* Automne : Pluie (Rapide et droite) */
+.rain {
+  position: absolute;
+  top: -20px;
+  width: 1px;
+  height: 25px;
+  background: rgba(150, 150, 150, 0.4);
+  animation: rainFall linear infinite;
+}
+@keyframes rainFall {
+  to { transform: translateY(105vh); }
+}
+
+/* Été : Soleil */
+.sun {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,230,109,0.3) 0%, rgba(255,230,109,0) 70%);
+  border-radius: 50%;
+  animation: pulseSun 10s infinite alternate;
+}
+@keyframes pulseSun {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* =========================================
+   EFFETS DE BORDS (SAISONS)
+   ========================================= */
+.edge-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2; /* Au-dessus du fond et des particules, mais sous l'UI (qui est en z-index 10) */
+}
+
+/* Hiver : Givre sur les bords */
+.edge-winter {
+  box-shadow: inset 0 0 80px 20px rgba(173, 216, 230, 0.6); /* Bleu clair givré */
+}
+
+/* Printemps : Lueur florale */
+.edge-spring {
+  box-shadow: inset 0 0 100px 30px rgba(255, 182, 193, 0.4); /* Rose poudré */
+}
+
+/* Été : Rayons de soleil depuis le coin haut-droit */
+.edge-summer {
+  background: linear-gradient(135deg, rgba(255, 223, 0, 0.15) 0%, transparent 40%);
+  box-shadow: inset 0 0 100px 40px rgba(255, 140, 0, 0.2); /* Lueur orange */
+}
+
+/* Automne : Vignette sombre et secousses de vent */
+.edge-autumn {
+  box-shadow: inset 0 0 100px 20px rgba(139, 69, 19, 0.3); /* Brun sombre */
+  animation: windShake 8s infinite ease-in-out;
+}
+
+/* Animation de secousse pour le vent d'automne */
+@keyframes windShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
 }

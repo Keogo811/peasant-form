@@ -5,7 +5,8 @@ import MyForms from './pages/MyForms'
 import CreateForm from './pages/CreateForm'
 import ViewForm from './pages/ViewForm'
 import Dashboard from './pages/Dashboard'
-import SettingsPanel from './components/SettingsPanel' // <-- IMPORT
+import SettingsPanel from './components/SettingsPanel'
+import SeasonalBackground from './components/SeasonalBackground' // <-- Nouvel import
 import './styles/themes.css'
 import './styles/main.css'
 
@@ -16,6 +17,13 @@ function App() {
   const [selectedFormId, setSelectedFormId] = useState(null)
   const [selectedDashboardId, setSelectedDashboardId] = useState(null)
   const [publicFormId, setPublicFormId] = useState(null)
+  
+  // État pour la saison
+  const [season, setSeason] = useState(localStorage.getItem('app-season') || 'none')
+
+  useEffect(() => {
+    localStorage.setItem('app-season', season)
+  }, [season])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -34,18 +42,18 @@ function App() {
 
   if (publicFormId) {
     content = (
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem', position: 'relative', zIndex: 10 }}>
         <ViewForm formId={publicFormId} onBack={() => setPublicFormId(null)} isPublic={true} />
       </div>
     )
   } else if (user) {
     if (selectedFormId) {
-      content = <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}><ViewForm formId={selectedFormId} onBack={() => setSelectedFormId(null)} /></div>
+      content = <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem', position: 'relative', zIndex: 10 }}><ViewForm formId={selectedFormId} onBack={() => setSelectedFormId(null)} /></div>
     } else if (selectedDashboardId) {
-      content = <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}><Dashboard formId={selectedDashboardId} onBack={() => setSelectedDashboardId(null)} /></div>
+      content = <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem', position: 'relative', zIndex: 10 }}><Dashboard formId={selectedDashboardId} onBack={() => setSelectedDashboardId(null)} /></div>
     } else {
       content = (
-        <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem', position: 'relative', zIndex: 10 }}>
           <header className="app-header">
             <h1>Peasant Form 🛠️</h1>
             <button className="btn" onClick={handleSignOut}>Déconnexion</button>
@@ -62,13 +70,17 @@ function App() {
       )
     }
   } else {
+    // Page de connexion : on n'affiche pas l'arrière-plan saisonnier
     content = <AuthPage onSuccess={setUser} />
   }
 
   return (
     <>
+      {/* On affiche l'arrière-plan saisonnier seulement si on n'est pas sur la page de connexion */}
+      {(!(!user && !publicFormId)) && <SeasonalBackground season={season} />}
+      
       {content}
-      <SettingsPanel />
+      <SettingsPanel season={season} setSeason={setSeason} />
     </>
   )
 }
