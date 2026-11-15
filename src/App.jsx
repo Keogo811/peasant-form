@@ -1,3 +1,4 @@
+import './styles/themes.css'
 import { useState, useEffect } from 'react'
 import { neon } from './lib/neon'
 import SignUp from './pages/SignUp'

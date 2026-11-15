@@ -1,0 +1,137 @@
+/* Importation de polices sympas depuis Google Fonts (gratuit) */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Mountains+of+Christmas:wght@700&family=Inter:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Pacifico&family=Roboto+Mono:wght@400;700&family=Cinzel:wght@400;700&display=swap');
+
+/* Base commune à tous les formulaires publics */
+.public-form {
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  max-width: 700px;
+  margin: 2rem auto;
+}
+
+.public-form input, 
+.public-form textarea, 
+.public-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 0.5rem;
+  font-family: inherit;
+}
+
+.public-form button[type="submit"] {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.1s;
+}
+
+.public-form button[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+/* =========================================
+   LES 7 THÈMES
+   ========================================= */
+
+/* 1. Gaming */
+.theme-gaming {
+  background: #1a1a2e;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  font-family: 'Press Start 2P', monospace;
+}
+.theme-gaming h2, .theme-gaming p { color: #00ffcc; }
+.theme-gaming input, .theme-gaming textarea, .theme-gaming select {
+  background: #16213e; color: #fff; border: 1px solid #00ffcc;
+}
+.theme-gaming button[type="submit"] {
+  background: #00ffcc; color: #1a1a2e;
+}
+
+/* 2. Noël */
+.theme-noel {
+  background: #fff5f5;
+  color: #165b33;
+  border: 2px solid #165b33;
+  font-family: 'Mountains of Christmas', cursive;
+}
+.theme-noel h2 { color: #bb2528; font-size: 2rem; }
+.theme-noel button[type="submit"] {
+  background: #bb2528; color: white;
+}
+
+/* 3. Pro moderne */
+.theme-pro {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e0e0e0;
+  font-family: 'Inter', sans-serif;
+}
+.theme-pro h2 { color: #0f172a; }
+.theme-pro button[type="submit"] {
+  background: #0f172a; color: white;
+}
+
+/* 4. Japonais */
+.theme-japonais {
+  background: #fdfbf7;
+  color: #2c3e50;
+  border-left: 8px solid #c0392b;
+  font-family: 'Noto Serif JP', serif;
+}
+.theme-japonais h2 { color: #c0392b; }
+.theme-japonais button[type="submit"] {
+  background: #c0392b; color: white;
+}
+
+/* 5. Fun plage */
+.theme-plage {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  color: #5d4037;
+  border-radius: 20px;
+  font-family: 'Pacifico', cursive;
+}
+.theme-plage h2 { color: #d84315; }
+.theme-plage input, .theme-plage textarea {
+  border: none; background: rgba(255,255,255,0.8);
+}
+.theme-plage button[type="submit"] {
+  background: #ff7043; color: white;
+}
+
+/* 6. Nerd code */
+.theme-nerd {
+  background: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  font-family: 'Roboto Mono', monospace;
+}
+.theme-nerd h2 { color: #58a6ff; }
+.theme-nerd input, .theme-nerd textarea, .theme-nerd select {
+  background: #010409; color: #c9d1d9; border: 1px solid #30363d;
+}
+.theme-nerd button[type="submit"] {
+  background: #238636; color: white;
+}
+
+/* 7. Royal */
+.theme-royal {
+  background: #2b1b3d;
+  color: #f1c40f;
+  border: 2px solid #f1c40f;
+  font-family: 'Cinzel', serif;
+}
+.theme-royal h2 { color: #f1c40f; }
+.theme-royal input, .theme-royal textarea, .theme-royal select {
+  background: #1a0f26; color: #fff; border: 1px solid #f1c40f;
+}
+.theme-royal button[type="submit"] {
+  background: #f1c40f; color: #2b1b3d;
+}

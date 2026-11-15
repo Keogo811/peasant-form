@@ -59,20 +59,30 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
     }
   }
 
-  if (loading) return <p>Chargement…</p>
-  if (!form) return <p>Formulaire introuvable.</p>
+  if (loading) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Chargement…</p>
+  if (!form) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Formulaire introuvable.</p>
 
   return (
-    <div style={{ marginTop: isPublic ? '0' : '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: 8 }}>
-      {/* Le bouton Retour ne s'affiche que si on n'est pas en mode public */}
+    <div className={`public-form theme-${form.theme || 'pro'}`}>
       {!isPublic && (
-        <button onClick={onBack} style={{ marginBottom: '1rem', padding: '0.5rem', cursor: 'pointer' }}>
+        <button 
+          onClick={onBack} 
+          style={{ 
+            marginBottom: '1rem', 
+            padding: '0.5rem', 
+            cursor: 'pointer', 
+            background: 'transparent', 
+            border: '1px solid currentColor', 
+            borderRadius: '4px', 
+            color: 'inherit' 
+          }}
+        >
           ← Retour
         </button>
       )}
       
       <h2>{form.title}</h2>
-      <p style={{ color: '#666' }}>{form.description}</p>
+      <p style={{ opacity: 0.8 }}>{form.description}</p>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
         {questions.map((q) => (
@@ -82,30 +92,31 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
             </label>
             
             {q.type === 'short_text' && (
-              <input type="text" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} style={{ width: '100%', padding: '0.5rem' }} />
+              <input type="text" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} />
             )}
             
             {q.type === 'long_text' && (
-              <textarea required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} style={{ width: '100%', padding: '0.5rem' }} rows={3} />
+              <textarea required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} rows={3} />
             )}
 
             {q.type === 'date' && (
-              <input type="date" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} style={{ width: '100%', padding: '0.5rem' }} />
+              <input type="date" required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} />
             )}
 
             {q.type === 'single_choice' && q.options && (
-              <select required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} style={{ width: '100%', padding: '0.5rem' }}>
+              <select required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)}>
                 <option value="">-- Choisir --</option>
                 {q.options.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
               </select>
             )}
 
             {q.type === 'multiple_choice' && q.options && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {q.options.map((opt, i) => (
-                  <label key={i} style={{ fontWeight: 'normal' }}>
+                  <label key={i} style={{ fontWeight: 'normal', display: 'flex', alignItems: 'center' }}>
                     <input 
                       type="checkbox" 
+                      style={{ width: 'auto', marginRight: '0.5rem' }}
                       onChange={(e) => {
                         const current = answers[q.id] || [];
                         const next = e.target.checked ? [...current, opt] : current.filter(v => v !== opt);
@@ -118,29 +129,33 @@ export default function ViewForm({ formId, onBack, isPublic = false }) {
             )}
 
             {q.type === 'rating' && (
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
                 {[1, 2, 3, 4, 5].map(n => (
-                  <label key={n} style={{ fontWeight: 'normal' }}>
-                    <input type="radio" name={`q_${q.id}`} value={n} required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} /> {n}
+                  <label key={n} style={{ fontWeight: 'normal', display: 'flex', alignItems: 'center' }}>
+                    <input type="radio" name={`q_${q.id}`} value={n} required={q.required} onChange={(e) => handleAnswer(q.id, e.target.value)} style={{ width: 'auto', marginRight: '0.25rem' }} /> {n}
                   </label>
                 ))}
               </div>
             )}
 
             {q.type === 'boolean' && (
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <label><input type="radio" name={`q_${q.id}`} value="Oui" required={q.required} onChange={(e) => handleAnswer(q.id, 'Oui')} /> Oui</label>
-                <label><input type="radio" name={`q_${q.id}`} value="Non" required={q.required} onChange={(e) => handleAnswer(q.id, 'Non')} /> Non</label>
+              <div style={{ display: 'flex', gap: '1.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center' }}>
+                  <input type="radio" name={`q_${q.id}`} value="Oui" required={q.required} onChange={(e) => handleAnswer(q.id, 'Oui')} style={{ width: 'auto', marginRight: '0.25rem' }} /> Oui
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center' }}>
+                  <input type="radio" name={`q_${q.id}`} value="Non" required={q.required} onChange={(e) => handleAnswer(q.id, 'Non')} style={{ width: 'auto', marginRight: '0.25rem' }} /> Non
+                </label>
               </div>
             )}
           </div>
         ))}
         
-        <button type="submit" style={{ padding: '0.75rem', backgroundColor: '#111', color: 'white', borderRadius: 6, border: 'none', cursor: 'pointer' }}>
+        <button type="submit">
           Envoyer les réponses
         </button>
       </form>
-      {message && <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>{message}</p>}
+      {message && <p style={{ marginTop: '1.5rem', fontWeight: 'bold', textAlign: 'center' }}>{message}</p>}
     </div>
   )
 }
