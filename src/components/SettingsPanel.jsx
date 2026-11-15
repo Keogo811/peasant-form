@@ -1,12 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+// Quelques pistes libres de droits (CC0 / Pixabay) pour l'ambiance
+const TRACKS = [
+  { id: 'lofi', name: 'Lo-Fi Chill', url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3' },
+  { id: 'synth', name: 'Synthwave', url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3' },
+  { id: 'acoustic', name: 'Acoustic', url: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3' }
+]
 
 export default function SettingsPanel() {
   const [isOpen, setIsOpen] = useState(false)
   const [theme, setTheme] = useState(localStorage.getItem('app-theme') || 'light')
   const [fontSize, setFontSize] = useState(localStorage.getItem('app-fontsize') || '16px')
   const [accent, setAccent] = useState(localStorage.getItem('app-accent') || '#ff6b6b')
+  
+  // États pour la musique
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTrack, setCurrentTrack] = useState(TRACKS[0])
+  const audioRef = useRef(null)
 
-  // Appliquer les changements dès qu'ils bougent
+  // Appliquer les styles
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     document.documentElement.style.fontSize = fontSize
@@ -17,13 +29,36 @@ export default function SettingsPanel() {
     localStorage.setItem('app-accent', accent)
   }, [theme, fontSize, accent])
 
+  // Gérer la musique
+  function togglePlay() {
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setIsPlaying(!isPlaying)
+  }
+
+  function changeTrack(track) {
+    setCurrentTrack(track)
+    setIsPlaying(false)
+    // On laisse un petit délai pour que React mette à jour la source audio avant de jouer
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play()
+        setIsPlaying(true)
+      }
+    }, 100)
+  }
+
   return (
     <>
+      {/* Le lecteur audio (invisible) */}
+      <audio ref={audioRef} src={currentTrack.url} loop />
+
       <button className="settings-toggle" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? '✖' : '⚙️'}
       </button>
-
-// ... (le début du fichier reste identique)
 
       {isOpen && (
         <div className="settings-panel">
@@ -54,6 +89,34 @@ export default function SettingsPanel() {
                 />
               ))}
             </div>
+          </div>
+
+          {/* NOUVELLE SECTION : MUSIQUE */}
+          <div className="settings-section" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--text)' }}>
+            <h4 style={{ color: 'var(--text)' }}>Musique d'ambiance</h4>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+              <button className="btn" onClick={togglePlay} style={{ padding: '0.5rem', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%' }}>
+                {isPlaying ? '⏸' : '▶️'}
+              </button>
+              <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text)' }}>
+                {currentTrack.name}
+              </span>
+            </div>
+
+            <select 
+              className="input" 
+              style={{ padding: '0.25rem', fontSize: '0.85rem', marginBottom: 0 }}
+              value={currentTrack.id}
+              onChange={(e) => {
+                const track = TRACKS.find(t => t.id === e.target.value)
+                if (track) changeTrack(track)
+              }}
+            >
+              {TRACKS.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
           </div>
         </div>
       )}
