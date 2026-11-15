@@ -18,13 +18,7 @@ function DonutChart({ data, total }) {
           const strokeDashoffset = -accumulatedPercent * circumference
           accumulatedPercent += percent
           return (
-            <circle
-              key={i}
-              cx="60" cy="60" r={radius} fill="transparent"
-              stroke={item.color} strokeWidth="20"
-              strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset}
-              style={{ transition: 'stroke-dasharray 1s ease' }}
-            />
+            <circle key={i} cx="60" cy="60" r={radius} fill="transparent" stroke={item.color} strokeWidth="20" strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} style={{ transition: 'stroke-dasharray 1s ease' }} />
           )
         })}
       </svg>
@@ -54,13 +48,7 @@ function BarChart({ data, total }) {
               <span>{item.count} ({percentage}%)</span>
             </div>
             <div style={{ width: '100%', backgroundColor: 'var(--bg)', border: '1px solid var(--text)', borderRadius: '8px', height: '16px', overflow: 'hidden' }}>
-              <div style={{ 
-                width: `${percentage}%`, 
-                backgroundColor: item.color, 
-                height: '100%', 
-                borderRadius: '6px',
-                transition: 'width 1s ease-in-out' 
-              }} />
+              <div style={{ width: `${percentage}%`, backgroundColor: item.color, height: '100%', borderRadius: '6px', transition: 'width 1s ease-in-out' }} />
             </div>
           </div>
         )
@@ -69,11 +57,21 @@ function BarChart({ data, total }) {
   )
 }
 
+// --- FONCTIONS D'EXPORT ---
+function downloadFile(content, fileName, contentType) {
+  const a = document.createElement("a");
+  const file = new Blob([content], { type: contentType });
+  a.href = URL.createObjectURL(file);
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 export default function Dashboard({ formId, onBack, isPublic = false }) {
   const [responses, setResponses] = useState([])
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showRaw, setShowRaw] = useState(false) // État pour afficher/masquer le détail
+  const [showRaw, setShowRaw] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -86,6 +84,40 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     load()
   }, [formId])
 
+  // --- LOGIQUE D'EXPORT CSV ---
+  function handleExportCSV() {
+    // 1. Créer les en-têtes : Date + Titre des questions
+    const headers = ['Date de soumission', ...questions.map(q => `"${q.label.replace(/"/g, '""')}"`)]
+    
+    // 2. Créer les lignes de données
+    const rows = responses.map(r => {
+      const date = new Date(r.submitted_at).toLocaleString()
+      const answers = questions.map(q => {
+        const ans = r.answers?.find(a => a.question_id === q.id)
+        // On échappe les guillemets doubles pour le CSV
+        return ans && ans.value ? `"${ans.value.replace(/"/g, '""')}"` : '""'
+      })
+      return [date, ...answers].join(';') // Utilisation du point-virgule pour Excel FR
+    })
+
+    const csvContent = [headers.join(';'), ...rows].join('\n')
+    // Ajout du BOM UTF-8 pour qu'Excel affiche bien les accents
+    downloadFile('\uFEFF' + csvContent, `export_formulaire_${formId}.csv`, 'text/csv;charset=utf-8;')
+  }
+
+  // --- LOGIQUE D'EXPORT JSON ---
+  function handleExportJSON() {
+    const cleanData = responses.map(r => {
+      const obj = { date: r.submitted_at }
+      questions.forEach(q => {
+        const ans = r.answers?.find(a => a.question_id === q.id)
+        obj[q.label] = ans ? ans.value : null
+      })
+      return obj
+    })
+    downloadFile(JSON.stringify(cleanData, null, 2), `export_formulaire_${formId}.json`, 'application/json')
+  }
+
   if (loading) return <p>Chargement des résultats…</p>
 
   // --- ANALYSE DES DONNÉES ---
@@ -93,7 +125,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
   const ratingQuestions = questions.filter(q => q.type === 'rating')
   const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00b894', '#0984e3']
 
-  // Calcul de la moyenne globale des notes (si des questions notes existent)
   let averageScore = null
   if (ratingQuestions.length > 0 && responses.length > 0) {
     let totalScore = 0
@@ -110,7 +141,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     if (totalVotes > 0) averageScore = (totalScore / totalVotes).toFixed(1)
   }
 
-  // Préparation des données pour les graphiques
   const stats = chartQuestions.map(q => {
     let counts = {}
     if (q.type === 'multiple_choice' || q.type === 'single_choice') {
@@ -146,14 +176,27 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         <button className="btn" onClick={onBack} style={{ marginBottom: '2rem' }}>← Retour aux formulaires</button>
       )}
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
+      {/* EN-TÊTE DU DASHBOARD AVEC BOUTONS D'EXPORT */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0', color: 'var(--text)' }}>Tableau de bord</h2>
           <p style={{ color: 'var(--text)', opacity: 0.7, margin: 0 }}>Analyse des performances de ton formulaire.</p>
         </div>
+        
+        {responses.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn" onClick={handleExportCSV} style={{ backgroundColor: '#28a745', color: 'white', borderColor: '#1a1a1a' }}>
+              📥 Export CSV
+            </button>
+            <button className="btn" onClick={handleExportJSON} style={{ backgroundColor: '#17a2b8', color: 'white', borderColor: '#1a1a1a' }}>
+              📦 Export JSON
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* --- CARTES KPI (INDICATEURS CLÉS) --- */}
+      {/* ... (Le reste des KPI, graphiques et réponses brutes reste identique) ... */}
+      
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid var(--primary)' }}>
           <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Total Réponses</p>
@@ -182,17 +225,12 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* --- SECTION GRAPHIQUES --- */}
       {responses.length > 0 && chartQuestions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           {stats.map(({ question, dataArray, totalVotes }) => (
             <div key={question.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', lineHeight: '1.3', color: 'var(--text)' }}>
-                {question.label}
-              </h4>
-              
+              <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', lineHeight: '1.3', color: 'var(--text)' }}>{question.label}</h4>
               <div style={{ marginTop: 'auto' }}>
-                {/* Si c'est un choix unique ou un Oui/Non, on affiche un Donut. Sinon des barres. */}
                 {(question.type === 'single_choice' || question.type === 'boolean') && totalVotes > 0 ? (
                   <DonutChart data={dataArray.filter(d => d.count > 0)} total={totalVotes} />
                 ) : (
@@ -204,14 +242,9 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* --- SECTION RÉPONSES BRUTES (MASQUÉE PAR DÉFAUT) --- */}
       {responses.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
-          <button 
-            className="btn" 
-            onClick={() => setShowRaw(!showRaw)} 
-            style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-          >
+          <button className="btn" onClick={() => setShowRaw(!showRaw)} style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
             {showRaw ? '▲ Masquer le détail des réponses' : '▼ Afficher le détail des réponses brutes'}
           </button>
 
@@ -232,9 +265,7 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
                         <li key={q.id} style={{ marginBottom: '0.5rem' }}>
                           <strong>{q.label} :</strong>{' '}
                           {answer ? (
-                            <span style={{ backgroundColor: 'var(--bg)', padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid var(--text)' }}>
-                              {answer.value}
-                            </span>
+                            <span style={{ backgroundColor: 'var(--bg)', padding: '0.2rem 0.4rem', borderRadius: '4px', border: '1px solid var(--text)' }}>{answer.value}</span>
                           ) : (
                             <em style={{ opacity: 0.5 }}>(vide)</em>
                           )}
