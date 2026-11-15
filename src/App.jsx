@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { neon } from './lib/neon'
 import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
+import MyForms from './pages/MyForms'
 
 function App() {
-  const [view, setView] = useState('signin') // 'signin' | 'signup'
+  const [view, setView] = useState('signin')
   const [user, setUser] = useState(null)
 
   async function handleSignOut() {
@@ -15,15 +16,15 @@ function App() {
 
   if (user) {
     return (
-      <div style={{ maxWidth: 600, margin: '4rem auto', padding: '1rem', fontFamily: 'sans-serif' }}>
-        <h1>Peasant Form</h1>
-        <p>Connecté en tant que <strong>{user.email}</strong></p>
-        <button onClick={handleSignOut} style={{ padding: '0.5rem 1rem' }}>
-          Se déconnecter
-        </button>
-        <p style={{ marginTop: '2rem', color: '#666' }}>
-          La liste de tes formulaires arrivera à l'étape suivante.
-        </p>
+      <div style={{ maxWidth: 700, margin: '2rem auto', padding: '1rem', fontFamily: 'sans-serif' }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1>Peasant Form</h1>
+          <button onClick={handleSignOut} style={{ padding: '0.5rem 1rem' }}>
+            Se déconnecter
+          </button>
+        </header>
+        <p style={{ color: '#666' }}>Connecté : {user.email}</p>
+        <MyForms />
       </div>
     )
   }
