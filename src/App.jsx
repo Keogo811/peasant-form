@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { neon } from './lib/neon'
-import AuthPage from './pages/AuthPage' // <-- Import du nouveau composant
+import AuthPage from './pages/AuthPage'
 import MyForms from './pages/MyForms'
 import CreateForm from './pages/CreateForm'
 import ViewForm from './pages/ViewForm'
 import Dashboard from './pages/Dashboard'
+import SettingsPanel from './components/SettingsPanel' // <-- IMPORT
 import './styles/themes.css'
 import './styles/main.css'
 
@@ -28,38 +29,48 @@ function App() {
     setAppView('list')
   }
 
+  // --- RENDU DES PAGES ---
+  let content
+
   if (publicFormId) {
-    return (
+    content = (
       <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}>
         <ViewForm formId={publicFormId} onBack={() => setPublicFormId(null)} isPublic={true} />
       </div>
     )
-  }
+  } else if (user) {
+    if (selectedFormId) {
+      content = <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}><ViewForm formId={selectedFormId} onBack={() => setSelectedFormId(null)} /></div>
+    } else if (selectedDashboardId) {
+      content = <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}><Dashboard formId={selectedDashboardId} onBack={() => setSelectedDashboardId(null)} /></div>
+    } else {
+      content = (
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
+          <header className="app-header">
+            <h1>Peasant Form 🛠️</h1>
+            <button className="btn" onClick={handleSignOut}>Déconnexion</button>
+          </header>
+          
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+            <button className={`btn ${appView === 'list' ? 'btn-primary' : ''}`} onClick={() => setAppView('list')}>Mes formulaires</button>
+            <button className={`btn ${appView === 'create' ? 'btn-primary' : ''}`} onClick={() => setAppView('create')}>Créer un formulaire</button>
+          </div>
 
-  if (user) {
-    if (selectedFormId) return <div style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}><ViewForm formId={selectedFormId} onBack={() => setSelectedFormId(null)} /></div>
-    if (selectedDashboardId) return <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}><Dashboard formId={selectedDashboardId} onBack={() => setSelectedDashboardId(null)} /></div>
-
-    return (
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem 1rem' }}>
-        <header className="app-header">
-          <h1>Peasant Form 🛠️</h1>
-          <button className="btn" onClick={handleSignOut}>Déconnexion</button>
-        </header>
-        
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-          <button className={`btn ${appView === 'list' ? 'btn-primary' : ''}`} onClick={() => setAppView('list')}>Mes formulaires</button>
-          <button className={`btn ${appView === 'create' ? 'btn-primary' : ''}`} onClick={() => setAppView('create')}>Créer un formulaire</button>
+          {appView === 'list' && <MyForms key={reloadKey} onViewForm={setSelectedFormId} onViewDashboard={setSelectedDashboardId} />}
+          {appView === 'create' && <CreateForm user={user} onCreated={() => { setReloadKey(k => k + 1); setAppView('list') }} />}
         </div>
-
-        {appView === 'list' && <MyForms key={reloadKey} onViewForm={setSelectedFormId} onViewDashboard={setSelectedDashboardId} />}
-        {appView === 'create' && <CreateForm user={user} onCreated={() => { setReloadKey(k => k + 1); setAppView('list') }} />}
-      </div>
-    )
+      )
+    }
+  } else {
+    content = <AuthPage onSuccess={setUser} />
   }
 
-  // Nouvelle page d'accueil
-  return <AuthPage onSuccess={setUser} />
+  return (
+    <>
+      {content}
+      <SettingsPanel />
+    </>
+  )
 }
 
 export default App
