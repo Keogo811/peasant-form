@@ -120,6 +120,10 @@ Le développement n'a pas été linéaire. Voici les principaux "combats" menés
 - **Problème** : Render ne trouvait pas le `Dockerfile` lors du premier déploiement.
 - **Solution** : Le fichier n'avait pas été poussé sur GitHub. Un `git add Dockerfile && git commit && git push` a résolu le problème.
 
+### 7. Les variables d'environnement Vite dans Docker (Build Args)
+- **Problème** : Après déploiement sur Render, l'application ne communiquait pas avec Neon (connexion impossible, console vide).
+- **Cause** : Vite injecte les variables `VITE_*` **au moment du build** (`npm run build`), pas au démarrage du conteneur. Render ne les fournissait pas à l'étape de construction.
+- **Solution** : Déclarer des `ARG` dans le `Dockerfile`, les convertir en `ENV` avant le `npm run build`, et configurer les variables dans l'interface Render (Environment). Un `git push` puis un `Clear build cache & deploy` a résolu le problème.
 ---
 
 ## 🔮 Améliorations Futures

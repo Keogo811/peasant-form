@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useI18n } from '../lib/i18n' // <-- Nouvel import
 
 // Pistes par défaut (en ligne). Remplace-les plus tard par tes imports locaux.
 const TRACKS = [
@@ -7,6 +8,8 @@ const TRACKS = [
 ]
 
 export default function SettingsPanel({ season, setSeason }) {
+  const { lang, changeLang, t } = useI18n() // <-- Récupération de la langue et de la fonction de traduction
+  
   const [isOpen, setIsOpen] = useState(false)
   const [theme, setTheme] = useState(localStorage.getItem('app-theme') || 'light')
   const [fontSize, setFontSize] = useState(localStorage.getItem('app-fontsize') || '16px')
@@ -52,23 +55,30 @@ export default function SettingsPanel({ season, setSeason }) {
 
       {isOpen && (
         <div className="settings-panel">
-          <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text)' }}>Paramètres</h3>
+          <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text)' }}>{t('settings')}</h3>
 
-          <div className="settings-section">
-            <h4 style={{ color: 'var(--text)' }}>Thème</h4>
-            <button className={`option-btn ${theme === 'light' ? 'active' : ''}`} onClick={() => setTheme('light')}>☀️ Clair</button>
-            <button className={`option-btn ${theme === 'dark' ? 'active' : ''}`} onClick={() => setTheme('dark')}>🌙 Sombre</button>
+          {/* SÉLECTEUR DE LANGUE */}
+          <div className="settings-section" style={{ marginBottom: '1rem' }}>
+            <h4 style={{ color: 'var(--text)' }}>Language / Langue</h4>
+            <button className={`option-btn ${lang === 'fr' ? 'active' : ''}`} onClick={() => changeLang('fr')}>🇫🇷 FR</button>
+            <button className={`option-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => changeLang('en')}>🇬🇧 EN</button>
           </div>
 
           <div className="settings-section">
-            <h4 style={{ color: 'var(--text)' }}>Taille du texte</h4>
-            <button className={`option-btn ${fontSize === '14px' ? 'active' : ''}`} onClick={() => setFontSize('14px')}>Petit</button>
-            <button className={`option-btn ${fontSize === '16px' ? 'active' : ''}`} onClick={() => setFontSize('16px')}>Normal</button>
-            <button className={`option-btn ${fontSize === '18px' ? 'active' : ''}`} onClick={() => setFontSize('18px')}>Grand</button>
+            <h4 style={{ color: 'var(--text)' }}>{t('theme')}</h4>
+            <button className={`option-btn ${theme === 'light' ? 'active' : ''}`} onClick={() => setTheme('light')}>{t('light')}</button>
+            <button className={`option-btn ${theme === 'dark' ? 'active' : ''}`} onClick={() => setTheme('dark')}>{t('dark')}</button>
           </div>
 
           <div className="settings-section">
-            <h4 style={{ color: 'var(--text)' }}>Couleur d'accent</h4>
+            <h4 style={{ color: 'var(--text)' }}>{t('text_size')}</h4>
+            <button className={`option-btn ${fontSize === '14px' ? 'active' : ''}`} onClick={() => setFontSize('14px')}>{t('small')}</button>
+            <button className={`option-btn ${fontSize === '16px' ? 'active' : ''}`} onClick={() => setFontSize('16px')}>{t('normal')}</button>
+            <button className={`option-btn ${fontSize === '18px' ? 'active' : ''}`} onClick={() => setFontSize('18px')}>{t('large')}</button>
+          </div>
+
+          <div className="settings-section">
+            <h4 style={{ color: 'var(--text)' }}>{t('accent_color')}</h4>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
               {['#ff6b6b', '#4ecdc4', '#a29bfe', '#ffe66d', '#1a1a1a'].map(c => (
                 <div key={c} className="color-circle" style={{ backgroundColor: c, transform: accent === c ? 'scale(1.3)' : 'scale(1)', borderColor: 'var(--text)' }} onClick={() => setAccent(c)} />
@@ -76,20 +86,20 @@ export default function SettingsPanel({ season, setSeason }) {
             </div>
           </div>
 
-          {/* NOUVELLE SECTION : SAISONS */}
+          {/* SAISONS */}
           <div className="settings-section" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--text)' }}>
-            <h4 style={{ color: 'var(--text)' }}>Ambiance</h4>
+            <h4 style={{ color: 'var(--text)' }}>{t('ambiance')}</h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-              <button className={`option-btn ${season === 'none' ? 'active' : ''}`} onClick={() => setSeason('none')}>Aucune</button>
-              <button className={`option-btn ${season === 'winter' ? 'active' : ''}`} onClick={() => setSeason('winter')}>❄️ Hiver</button>
-              <button className={`option-btn ${season === 'spring' ? 'active' : ''}`} onClick={() => setSeason('spring')}>🌸 Printemps</button>
-              <button className={`option-btn ${season === 'summer' ? 'active' : ''}`} onClick={() => setSeason('summer')}>☀️ Été</button>
-              <button className={`option-btn ${season === 'autumn' ? 'active' : ''}`} onClick={() => setSeason('autumn')}>🍂 Automne</button>
+              <button className={`option-btn ${season === 'none' ? 'active' : ''}`} onClick={() => setSeason('none')}>{t('none')}</button>
+              <button className={`option-btn ${season === 'winter' ? 'active' : ''}`} onClick={() => setSeason('winter')}>{t('winter')}</button>
+              <button className={`option-btn ${season === 'spring' ? 'active' : ''}`} onClick={() => setSeason('spring')}>{t('spring')}</button>
+              <button className={`option-btn ${season === 'summer' ? 'active' : ''}`} onClick={() => setSeason('summer')}>{t('summer')}</button>
+              <button className={`option-btn ${season === 'autumn' ? 'active' : ''}`} onClick={() => setSeason('autumn')}>{t('autumn')}</button>
             </div>
           </div>
 
           <div className="settings-section" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--text)' }}>
-            <h4 style={{ color: 'var(--text)' }}>Musique</h4>
+            <h4 style={{ color: 'var(--text)' }}>{t('music')}</h4>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
               <button className="btn" onClick={togglePlay} style={{ padding: '0.5rem', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%' }}>
                 {isPlaying ? '⏸' : '▶️'}
