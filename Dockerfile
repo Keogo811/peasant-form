@@ -13,6 +13,18 @@ RUN npm install
 # 5. On copie tout le reste du code source
 COPY . .
 
+# Déclarer les arguments de build (récupérés depuis Render)
+ARG VITE_NEON_DATA_API_URL
+ARG VITE_NEON_AUTH_URL
+ARG VITE_NEON_JWKS_URL
+
+# Les transformer en variables d'environnement pour Vite
+ENV VITE_NEON_DATA_API_URL=$VITE_NEON_DATA_API_URL
+ENV VITE_NEON_AUTH_URL=$VITE_NEON_AUTH_URL
+ENV VITE_NEON_JWKS_URL=$VITE_NEON_JWKS_URL
+
+RUN npm run build
+
 # 6. On construit l'application pour la production (génère le dossier 'dist')
 RUN npm run build
 

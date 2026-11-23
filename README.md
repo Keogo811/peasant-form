@@ -135,4 +135,3 @@ Le développement n'a pas été linéaire. Voici les principaux "combats" menés
 
 **Keogo**
 - *Projet réalisé dans une recherche d'alternative et un test de mettre en oeuvre toutes ses idées.*
-```
