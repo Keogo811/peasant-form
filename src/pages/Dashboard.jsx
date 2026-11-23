@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { neon } from '../lib/neon'
+import { useI18n } from '../lib/i18n'
 
 // --- LISTE DES MOTS VIDES (STOP WORDS FRANÇAIS) ---
 const STOP_WORDS = new Set([
@@ -66,11 +67,11 @@ function BarChart({ data, total }) {
   )
 }
 
-// --- NOUVEAU : COMPOSANT RADAR CHART ---
+// --- COMPOSANT RADAR CHART ---
 function RadarChart({ data }) {
   const size = 300
   const center = size / 2
-  const radius = size / 2 - 50 // Marge pour les labels
+  const radius = size / 2 - 50
   const angleStep = (Math.PI * 2) / data.length
 
   const getPoint = (value, max, index) => {
@@ -90,41 +91,28 @@ function RadarChart({ data }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem' }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* Grille de fond (polygones concentriques) */}
         {[0.25, 0.5, 0.75, 1].map(level => {
           const gridPoints = data.map((_, i) => {
-            const p = getPoint(level * 5, 5, i) // 5 est le max théorique
+            const p = getPoint(level * 5, 5, i)
             return `${p.x},${p.y}`
           }).join(' ')
           return <polygon key={level} points={gridPoints} fill="none" stroke="var(--text)" strokeOpacity={0.15} />
         })}
 
-        {/* Lignes des axes */}
         {data.map((_, i) => {
           const p = getPoint(5, 5, i)
           return <line key={i} x1={center} y1={center} x2={p.x} y2={p.y} stroke="var(--text)" strokeOpacity={0.15} />
         })}
 
-        {/* Polygone des données */}
         <polygon points={pointsString} fill="var(--primary)" fillOpacity={0.6} stroke="var(--primary)" strokeWidth={3} />
 
-        {/* Points et Labels */}
         {data.map((d, i) => {
           const p = getPoint(d.value, d.max, i)
-          const labelP = getPoint(5.8, 5, i) // Positionnement des labels à l'extérieur
-          
+          const labelP = getPoint(5.8, 5, i)
           return (
             <g key={i}>
               <circle cx={p.x} cy={p.y} r={5} fill="var(--primary)" stroke="var(--text)" strokeWidth={2} />
-              <text 
-                x={labelP.x} 
-                y={labelP.y} 
-                textAnchor="middle" 
-                dominantBaseline="middle" 
-                fontSize="11" 
-                fontWeight="bold" 
-                fill="var(--text)"
-              >
+              <text x={labelP.x} y={labelP.y} textAnchor="middle" dominantBaseline="middle" fontSize="11" fontWeight="bold" fill="var(--text)">
                 {d.label.length > 15 ? d.label.substring(0, 15) + '...' : d.label}
               </text>
             </g>
@@ -190,12 +178,11 @@ function generateWordCloud(responses, questions) {
 }
 
 export default function Dashboard({ formId, onBack, isPublic = false }) {
+  const { t } = useI18n()
   const [responses, setResponses] = useState([])
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [showRaw, setShowRaw] = useState(false)
-  
-  // Nouvel état pour afficher/masquer le nuage de mots
   const [showWordCloud, setShowWordCloud] = useState(false) 
 
   useEffect(() => {
@@ -235,9 +222,8 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
     downloadFile(JSON.stringify(cleanData, null, 2), `export_formulaire_${formId}.json`, 'application/json')
   }
 
-  if (loading) return <p>Chargement des résultats…</p>
+  if (loading) return <p>{t('loading_results')}</p>
 
-  // --- CALCULS ---
   const timelineData = {}
   responses.forEach(r => {
     const dateStr = new Date(r.submitted_at).toISOString().split('T')[0]
@@ -264,7 +250,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
           if (!isNaN(val)) { totalScore += val; totalVotes++; qScore += val; qVotes++ }
         }
       })
-      // Si on a au moins 3 questions de notes, on prépare les données du Radar
       if (ratingQuestions.length >= 3) {
         radarData.push({ label: q.label, value: qVotes > 0 ? (qScore / qVotes) : 0, max: 5 })
       }
@@ -309,49 +294,47 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
   return (
     <div>
       {!isPublic && (
-        <button className="btn" onClick={onBack} style={{ marginBottom: '2rem' }}>← Retour aux formulaires</button>
+        <button className="btn" onClick={onBack} style={{ marginBottom: '2rem' }}>← {t('dashboard_title')}</button>
       )}
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0', color: 'var(--text)' }}>Tableau de bord</h2>
-          <p style={{ color: 'var(--text)', opacity: 0.7, margin: 0 }}>Analyse des performances de ton formulaire.</p>
+          <h2 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0', color: 'var(--text)' }}>{t('dashboard_title')}</h2>
+          <p style={{ color: 'var(--text)', opacity: 0.7, margin: 0 }}>{t('dashboard_sub')}</p>
         </div>
         {responses.length > 0 && (
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn" onClick={handleExportCSV} style={{ backgroundColor: '#28a745', color: 'white', borderColor: '#1a1a1a' }}>📥 Export CSV</button>
-            <button className="btn" onClick={handleExportJSON} style={{ backgroundColor: '#17a2b8', color: 'white', borderColor: '#1a1a1a' }}>📦 Export JSON</button>
+            <button className="btn" onClick={handleExportCSV} style={{ backgroundColor: '#28a745', color: 'white', borderColor: '#1a1a1a' }}>📥 {t('export_csv')}</button>
+            <button className="btn" onClick={handleExportJSON} style={{ backgroundColor: '#17a2b8', color: 'white', borderColor: '#1a1a1a' }}>📦 {t('export_json')}</button>
           </div>
         )}
       </div>
 
-      {/* KPI CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid var(--primary)' }}>
-          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Total Réponses</p>
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>{t('total_responses')}</p>
           <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{responses.length}</h2>
         </div>
         {globalAverageScore && (
           <div className="card" style={{ textAlign: 'center', borderTop: '8px solid #feca57' }}>
-            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Moyenne globale</p>
+            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>{t('avg_score')}</p>
             <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{globalAverageScore} <span style={{ fontSize: '1.5rem', color: '#feca57' }}>★</span></h2>
           </div>
         )}
         <div className="card" style={{ textAlign: 'center', borderTop: '8px solid #4ecdc4' }}>
-          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>Questions</p>
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', opacity: 0.7, textTransform: 'uppercase' }}>{t('questions_count')}</p>
           <h2 style={{ fontSize: '3rem', margin: '0.5rem 0 0 0', color: 'var(--text)' }}>{questions.length}</h2>
         </div>
       </div>
 
-      {/* TIMELINE */}
       {responses.length > 0 && sortedDates.length > 0 && (
         <div className="card" style={{ marginBottom: '3rem', padding: '1.5rem' }}>
-          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>Volume de réponses dans le temps</h4>
+          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>{t('timeline_title')}</h4>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '150px', overflowX: 'auto', paddingBottom: '1rem', borderBottom: '2px solid var(--text)' }}>
             {sortedDates.map(date => {
               const count = timelineData[date]
               const heightPercent = (count / maxResponsesInADay) * 100
-              const displayDate = new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+              const displayDate = new Date(date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
               return (
                 <div key={date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--text)' }}>{count}</span>
@@ -364,19 +347,17 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* BOUTON TOGGLE NUAGE DE MOTS */}
       {responses.length > 0 && wordCloudData.length > 0 && (
         <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
           <button className="btn" onClick={() => setShowWordCloud(!showWordCloud)}>
-            {showWordCloud ? 'Masquer le nuage de mots' : 'Afficher le nuage de mots ☁️'}
+            {showWordCloud ? t('hide_word_cloud') : t('show_word_cloud')}
           </button>
         </div>
       )}
 
-      {/* NUAGE DE MOTS (Optionnel) */}
       {responses.length > 0 && showWordCloud && wordCloudData.length > 0 && (
         <div className="card" style={{ marginBottom: '3rem', padding: '2rem', textAlign: 'center' }}>
-          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>Nuage de mots (Questions textuelles)</h4>
+          <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)' }}>{t('word_cloud_title')}</h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '1rem' }}>
             {wordCloudData.map((word, i) => {
               const fontSize = 1 + (word.value / maxWordValue) * 2.5
@@ -397,7 +378,6 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* RADAR CHART (Si au moins 3 questions de notes) */}
       {radarData.length >= 3 && (
         <div className="card" style={{ marginBottom: '3rem' }}>
           <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', color: 'var(--text)', textAlign: 'center' }}>Vue d'ensemble (Radar des notes)</h4>
@@ -407,12 +387,11 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
 
       {responses.length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-          <p style={{ fontSize: '1.2rem', margin: 0 }}>Aucune donnée pour le moment.</p>
+          <p style={{ fontSize: '1.2rem', margin: 0 }}>{t('no_data')}</p>
           {!isPublic && <p style={{ opacity: 0.7, marginTop: '0.5rem' }}>Partage le lien de ton formulaire pour voir les graphiques apparaître !</p>}
         </div>
       )}
 
-      {/* GRILLE DES GRAPHIQUES DES QUESTIONS */}
       {responses.length > 0 && chartQuestions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           {stats.map(({ question, dataArray, totalVotes, advancedStats }) => (
@@ -428,15 +407,15 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
               {advancedStats && (
                 <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed var(--text)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Médiane</div>
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>{t('median')}</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>{advancedStats.median}</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Mode</div>
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>{t('mode')}</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>{advancedStats.mode}</div>
                   </div>
                   <div title="Un écart-type élevé signifie que les avis sont très divisés.">
-                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>Écart-type</div>
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, fontWeight: 'bold' }}>{t('std_dev')}</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text)' }}>±{advancedStats.stdDev}</div>
                   </div>
                 </div>
@@ -446,11 +425,10 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
         </div>
       )}
 
-      {/* RÉPONSES BRUTES MASQUÉES */}
       {responses.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
           <button className="btn" onClick={() => setShowRaw(!showRaw)} style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-            {showRaw ? '▲ Masquer le détail des réponses' : '▼ Afficher le détail des réponses brutes'}
+            {showRaw ? t('hide_raw_answers') : t('show_raw_answers')}
           </button>
 
           {showRaw && (
@@ -458,7 +436,7 @@ export default function Dashboard({ formId, onBack, isPublic = false }) {
               {responses.map((r, i) => (
                 <div key={r.id} className="card" style={{ padding: '1.5rem' }}>
                   <p style={{ margin: '0 0 1rem 0', fontWeight: 'bold', color: 'var(--primary)' }}>
-                    Réponse #{responses.length - i} 
+                    {t('response_num')} #{responses.length - i} 
                     <span style={{ fontWeight: 'normal', fontSize: '0.85em', color: 'var(--text)', opacity: 0.6, marginLeft: '0.5rem' }}>
                       ({new Date(r.submitted_at).toLocaleString()})
                     </span>

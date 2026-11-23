@@ -83,7 +83,35 @@ const translations = {
     spring: "🌸 Printemps",
     summer: "☀️ Été",
     autumn: "🍂 Automne",
-    music: "Musique"
+    music: "Musique",
+
+    // ViewForm
+    back: "← Retour",
+    send_answers: "Envoyer les réponses",
+    sending: "Envoi en cours…",
+    success_send: "Réponse envoyée avec succès ✅",
+    view_results: "Voir les résultats",
+    back_to_form: "← Retour au formulaire",
+    choose: "-- Choisir --",
+
+    // Dashboard
+    loading_results: "Chargement des résultats…",
+    dashboard_title: "Tableau de bord",
+    dashboard_sub: "Analyse des performances de ton formulaire.",
+    total_responses: "Total Réponses",
+    avg_score: "Moyenne globale",
+    questions_count: "Questions",
+    timeline_title: "Volume de réponses dans le temps",
+    word_cloud_title: "Nuage de mots (Questions textuelles)",
+    show_word_cloud: "Afficher le nuage de mots ☁️",
+    hide_word_cloud: "Masquer le nuage de mots",
+    show_raw_answers: "▼ Afficher le détail des réponses brutes",
+    hide_raw_answers: "▲ Masquer le détail des réponses",
+    no_data: "Aucune donnée pour le moment.",
+    response_num: "Réponse",
+    median: "Médiane",
+    mode: "Mode",
+    std_dev: "Écart-type",
   },
   en: {
     // Login / Register
@@ -167,7 +195,35 @@ const translations = {
     spring: "🌸 Spring",
     summer: "☀️ Summer",
     autumn: "🍂 Autumn",
-    music: "Music"
+    music: "Music",
+
+    // ViewForm
+    back: "← Back",
+    send_answers: "Send answers",
+    sending: "Sending…",
+    success_send: "Response sent successfully ✅",
+    view_results: "View results",
+    back_to_form: "← Back to form",
+    choose: "-- Choose --",
+
+    // Dashboard
+    loading_results: "Loading results…",
+    dashboard_title: "Dashboard",
+    dashboard_sub: "Analyze your form's performance.",
+    total_responses: "Total Responses",
+    avg_score: "Global Average",
+    questions_count: "Questions",
+    timeline_title: "Response Volume over Time",
+    word_cloud_title: "Word Cloud (Textual Questions)",
+    show_word_cloud: "Show Word Cloud ☁️",
+    hide_word_cloud: "Hide Word Cloud",
+    show_raw_answers: "▼ Show raw answers",
+    hide_raw_answers: "▲ Hide raw answers",
+    no_data: "No data yet.",
+    response_num: "Response",
+    median: "Median",
+    mode: "Mode",
+    std_dev: "Std Dev",
   }
 }
 
