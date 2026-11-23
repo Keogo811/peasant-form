@@ -30,6 +30,7 @@ Le projet a été conçu avec une contrainte de **zéro budget** et une volonté
 - **Export** : Téléchargement des données en **CSV** (compatible Excel) et **JSON**.
 
 ### Expérience Utilisateur (UX)
+- **Internationalisation (i18n)** : Interface entièrement traduite en Français et en Anglais, avec un sélecteur de langue persistant.
 - **Panneau de configuration flottant** : Mode sombre/clair, taille de police, couleur d'accentuation.
 - **Ambiances saisonnières** : Animations de fond (neige, pluie, pétales, soleil) avec effets de bordure.
 - **Musique d'ambiance** : Lecteur audio intégré.
@@ -124,11 +125,11 @@ Le développement n'a pas été linéaire. Voici les principaux "combats" menés
 - **Problème** : Après déploiement sur Render, l'application ne communiquait pas avec Neon (connexion impossible, console vide).
 - **Cause** : Vite injecte les variables `VITE_*` **au moment du build** (`npm run build`), pas au démarrage du conteneur. Render ne les fournissait pas à l'étape de construction.
 - **Solution** : Déclarer des `ARG` dans le `Dockerfile`, les convertir en `ENV` avant le `npm run build`, et configurer les variables dans l'interface Render (Environment). Un `git push` puis un `Clear build cache & deploy` a résolu le problème.
+
 ---
 
 ## 🔮 Améliorations Futures
 
-- **Internationalisation (i18n)** : Ajout d'une version anglaise.
 - **Accessibilité** : Tests avec lecteurs d'écran et amélioration des attributs ARIA.
 - **Sécurité** : Implémentation d'un "Rate Limiting" pour éviter le spam de réponses.
 - **Fonctionnalités** : Système de "Mot de passe oublié" pour les créateurs.
@@ -137,5 +138,5 @@ Le développement n'a pas été linéaire. Voici les principaux "combats" menés
 
 ## 👤 Auteur
 
-**Keogo**
-- *Projet réalisé dans une recherche d'alternative et un test de mettre en oeuvre toutes ses idées.*
+**Keogo** — Étudiant en IA, passionné par le développement web.
+- *Projet réalisé dans le cadre dans la recherche d'alternative et de tester ses capacités de réaliser ses idées.*
