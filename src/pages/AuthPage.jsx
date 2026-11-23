@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import SignIn from './SignIn'
 import SignUp from './SignUp'
+import { useI18n } from '../lib/i18n'
 
 export default function AuthPage({ onSuccess }) {
   const [view, setView] = useState('signin')
+  const { t } = useI18n()
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
@@ -19,9 +21,9 @@ export default function AuthPage({ onSuccess }) {
       <div className="floating-emoji" style={{ fontSize: '7rem', left: '2%', top: '10%', animationDelay: '0s' }}>🚀</div>
       <div className="floating-emoji" style={{ fontSize: '2rem', left: '15%', top: '25%', animationDelay: '-1s' }}>🎨</div>
       <div className="floating-emoji" style={{ fontSize: '4.5rem', left: '25%', bottom: '15%', animationDelay: '-2s' }}>👾</div>
-      <div className="floating-emoji" style={{ fontSize: '5rem', left: '5%', top: '55%', animationDelay: '-3s' }}>🕹️</div>
+      <div className="floating-emoji" style={{ fontSize: '3rem', left: '5%', top: '55%', animationDelay: '-3s' }}>🕹️</div>
       <div className="floating-emoji" style={{ fontSize: '6rem', left: '8%', bottom: '-2%', animationDelay: '-4s' }}>🍕</div>
-      <div className="floating-emoji" style={{ fontSize: '3.5rem', left: '25%', top: '45%', animationDelay: '-5s' }}>💡</div>
+      <div className="floating-emoji" style={{ fontSize: '2.5rem', left: '30%', top: '45%', animationDelay: '-5s' }}>💡</div>
       <div className="floating-emoji" style={{ fontSize: '5.5rem', right: '3%', top: '15%', animationDelay: '-1s' }}>✨</div>
       <div className="floating-emoji" style={{ fontSize: '2rem', right: '20%', top: '30%', animationDelay: '-2s' }}>🍩</div>
       <div className="floating-emoji" style={{ fontSize: '7rem', right: '-2%', bottom: '10%', animationDelay: '-3s' }}>🪩</div>
@@ -32,16 +34,15 @@ export default function AuthPage({ onSuccess }) {
       {/* --- CONTENU PRINCIPAL --- */}
       <div style={{ position: 'relative', zIndex: 10, maxWidth: 450, margin: '0 auto', padding: '4rem 1rem' }}>
         
-        {/* LE NOUVEAU TITRE BULLE */}
         <h1 className="app-title app-title-large">
           Peasant Form
         </h1>
 
         <div style={{ textAlign: 'center', marginBottom: '2.5rem', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--text)' }}>
-          Marre de Google Forms ? Reprends le contrôle. 🤘
+          {t('app_desc')}
           <br/>
           <span style={{ fontSize: '1rem', fontWeight: 'normal', display: 'block', marginTop: '0.5rem' }}>
-            Crée des formulaires stylés, partage-les, et analyse les résultats. C'est fun, c'est gratuit, et ça t'appartient. 🚀
+            {t('app_sub')}
           </span>
         </div>
 
@@ -56,14 +57,14 @@ export default function AuthPage({ onSuccess }) {
             border: 'var(--border)',
             boxShadow: '2px 2px 0px var(--text)'
           }}>
-            💡 <strong>Pourquoi se connecter ?</strong>
+            <strong>{t('why_login')}</strong>
             <br/>
-            Ton compte te permet de garder tes formulaires privés et de voir qui a répondu. Les gens qui répondent à tes liens n'ont pas besoin de compte !
+            {t('why_login_desc')}
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-            <button className={`btn ${view === 'signin' ? 'btn-primary' : ''}`} style={{ flex: 1 }} onClick={() => setView('signin')}>Connexion</button>
-            <button className={`btn ${view === 'signup' ? 'btn-primary' : ''}`} style={{ flex: 1 }} onClick={() => setView('signup')}>Inscription</button>
+            <button className={`btn ${view === 'signin' ? 'btn-primary' : ''}`} style={{ flex: 1 }} onClick={() => setView('signin')}>{t('login')}</button>
+            <button className={`btn ${view === 'signup' ? 'btn-primary' : ''}`} style={{ flex: 1 }} onClick={() => setView('signup')}>{t('signup')}</button>
           </div>
 
           <div>
