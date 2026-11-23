@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
 import { neon } from './lib/neon'
+import { useI18n } from './lib/i18n' // <-- Nouvel import
 import AuthPage from './pages/AuthPage'
 import MyForms from './pages/MyForms'
 import CreateForm from './pages/CreateForm'
 import ViewForm from './pages/ViewForm'
 import Dashboard from './pages/Dashboard'
 import SettingsPanel from './components/SettingsPanel'
-import SeasonalBackground from './components/SeasonalBackground' // <-- Nouvel import
+import SeasonalBackground from './components/SeasonalBackground'
 import './styles/themes.css'
 import './styles/main.css'
 
 function App() {
+  const { t } = useI18n() // <-- Récupération de la fonction de traduction
   const [user, setUser] = useState(null)
   const [appView, setAppView] = useState('list')
   const [reloadKey, setReloadKey] = useState(0)
@@ -58,12 +60,12 @@ function App() {
             <h1 className="app-title app-title-large">
               Peasant Form
             </h1>
-            <button className="btn" onClick={handleSignOut}>Déconnexion</button>
+            <button className="btn" onClick={handleSignOut}>{t('logout')}</button>
           </header>
           
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-            <button className={`btn ${appView === 'list' ? 'btn-primary' : ''}`} onClick={() => setAppView('list')}>Mes formulaires</button>
-            <button className={`btn ${appView === 'create' ? 'btn-primary' : ''}`} onClick={() => setAppView('create')}>Créer un formulaire</button>
+            <button className={`btn ${appView === 'list' ? 'btn-primary' : ''}`} onClick={() => setAppView('list')}>{t('my_forms')}</button>
+            <button className={`btn ${appView === 'create' ? 'btn-primary' : ''}`} onClick={() => setAppView('create')}>{t('create_form')}</button>
           </div>
 
           {appView === 'list' && <MyForms key={reloadKey} onViewForm={setSelectedFormId} onViewDashboard={setSelectedDashboardId} />}
