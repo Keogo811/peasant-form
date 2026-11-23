@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { neon } from '../lib/neon'
+import { useI18n } from '../lib/i18n'
 
 const THEMES = [
   { id: 'gaming', name: 'Gaming', bg: '#1a1a2e', color: '#00ffcc', font: "'Press Start 2P', monospace", border: '2px solid #00ffcc' },
   { id: 'noel', name: 'Noël', bg: '#fdf5f5', color: '#d32f2f', font: "'Mountains of Christmas', cursive", border: '3px solid #d32f2f' },
   { id: 'pro', name: 'Pro', bg: '#ffffff', color: '#0f172a', font: "'Inter', sans-serif", border: '1px solid #cbd5e1' },
-  // Nouvel aperçu Japonais (Rouge et blanc)
   { id: 'japonais', name: 'Japonais', bg: '#fdfbf7', color: '#c0392b', font: "'Noto Serif JP', serif", border: '2px solid #c0392b' },
   { id: 'plage', name: 'Plage', bg: '#fecfef', color: '#d84315', font: "'Pacifico', cursive", border: '3px dashed #ff7043' },
   { id: 'nerd', name: 'Nerd', bg: '#0d1117', color: '#58a6ff', font: "'Roboto Mono', monospace", border: '1px solid #30363d' },
-  // Nouvel aperçu Royal (Ivoire et Or)
   { id: 'royal', name: 'Royal', bg: '#fdfbf7', color: '#4a0e4e', font: "'Cinzel', serif", border: '2px solid #d4af37' }
 ]
 
@@ -47,6 +46,7 @@ const compressImage = (file) => {
 }
 
 export default function CreateForm({ user, onCreated }) {
+  const { t } = useI18n()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [theme, setTheme] = useState('gaming')
@@ -79,7 +79,7 @@ export default function CreateForm({ user, onCreated }) {
       .insert({ creator_id: user.id, title, description, theme, image_url: image, is_published: false })
       .select().single()
 
-    if (formError) { setSaving(false); setMessage(`Erreur formulaire : ${formError.message}`); return }
+    if (formError) { setSaving(false); setMessage(`Error: ${formError.message}`); return }
 
     const questionsToInsert = questions
       .filter((q) => q.label.trim() !== '')
@@ -91,41 +91,41 @@ export default function CreateForm({ user, onCreated }) {
 
     if (questionsToInsert.length > 0) {
       const { error: qError } = await neon.from('questions').insert(questionsToInsert)
-      if (qError) { setSaving(false); setMessage(`Erreur questions : ${qError.message}`); return }
+      if (qError) { setSaving(false); setMessage(`Error questions: ${qError.message}`); return }
     }
 
     setSaving(false)
-    setMessage('Formulaire créé ✅')
+    setMessage('✅')
     onCreated?.()
   }
 
   return (
     <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <h2 style={{ marginTop: 0, color: 'var(--text)' }}>Créer un formulaire</h2>
+      <h2 style={{ marginTop: 0, color: 'var(--text)' }}>{t('create_title')}</h2>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <label style={{ color: 'var(--text)', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            Titre du formulaire *
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Ex: Sondage sur le nouvel event" />
+            {t('form_title')}
+            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Ex: Event survey" />
           </label>
           <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
-            Description
-            <textarea className="input" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Explique brièvement le but de ce formulaire..." />
+            {t('form_desc')}
+            <textarea className="input" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="..." />
           </label>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <span style={{ color: 'var(--text)', fontWeight: 'bold' }}>Image d'illustration (optionnel)</span>
+            <span style={{ color: 'var(--text)', fontWeight: 'bold' }}>{t('image_upload')}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="image-upload" />
               <label htmlFor="image-upload" className="btn" style={{ cursor: 'pointer' }}>
-                📷 Choisir une image
+                {t('choose_image')}
               </label>
               {image && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <img src={image} alt="Aperçu" style={{ height: '40px', borderRadius: '4px', border: '1px solid var(--text)' }} />
-                  <button type="button" onClick={() => setImage(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', fontWeight: 'bold' }}>Supprimer</button>
+                  <img src={image} alt="Preview" style={{ height: '40px', borderRadius: '4px', border: '1px solid var(--text)' }} />
+                  <button type="button" onClick={() => setImage(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', fontWeight: 'bold' }}>{t('remove_image')}</button>
                 </div>
               )}
             </div>
@@ -133,36 +133,36 @@ export default function CreateForm({ user, onCreated }) {
         </div>
 
         <div>
-          <h3 style={{ color: 'var(--text)', borderBottom: '2px solid var(--text)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Choisir un thème visuel</h3>
+          <h3 style={{ color: 'var(--text)', borderBottom: '2px solid var(--text)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{t('choose_theme')}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-            {THEMES.map(t => (
+            {THEMES.map(th => (
               <div 
-                key={t.id}
-                onClick={() => setTheme(t.id)}
+                key={th.id}
+                onClick={() => setTheme(th.id)}
                 style={{
                   cursor: 'pointer',
-                  border: theme === t.id ? '4px solid var(--primary)' : '1px solid #888',
+                  border: theme === th.id ? '4px solid var(--primary)' : '1px solid #888',
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  boxShadow: theme === t.id ? '0 0 15px var(--primary)' : 'none',
+                  boxShadow: theme === th.id ? '0 0 15px var(--primary)' : 'none',
                   transition: 'all 0.2s',
-                  transform: theme === t.id ? 'scale(1.05)' : 'scale(1)'
+                  transform: theme === th.id ? 'scale(1.05)' : 'scale(1)'
                 }}
               >
                 <div style={{ 
-                  backgroundColor: t.bg, 
+                  backgroundColor: th.bg, 
                   padding: '1.5rem 0.5rem', 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  border: t.border,
-                  borderLeft: t.borderLeft || t.border,
-                  borderRight: t.id === 'japonais' ? 'none' : t.border,
-                  borderTop: t.id === 'japonais' ? 'none' : t.border,
-                  borderBottom: t.id === 'japonais' ? 'none' : t.border,
+                  border: th.border,
+                  borderLeft: th.borderLeft || th.border,
+                  borderRight: th.id === 'japonais' ? 'none' : th.border,
+                  borderTop: th.id === 'japonais' ? 'none' : th.border,
+                  borderBottom: th.id === 'japonais' ? 'none' : th.border,
                 }}>
-                  <span style={{ color: t.color, fontFamily: t.font, fontWeight: 'bold', fontSize: '1rem', textAlign: 'center' }}>
-                    {t.name}
+                  <span style={{ color: th.color, fontFamily: th.font, fontWeight: 'bold', fontSize: '1rem', textAlign: 'center' }}>
+                    {th.name}
                   </span>
                 </div>
               </div>
@@ -171,42 +171,42 @@ export default function CreateForm({ user, onCreated }) {
         </div>
 
         <div>
-          <h3 style={{ color: 'var(--text)', borderBottom: '2px solid var(--text)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Questions</h3>
+          <h3 style={{ color: 'var(--text)', borderBottom: '2px solid var(--text)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{t('questions')}</h3>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {questions.map((q, i) => (
               <div key={i} style={{ border: 'var(--border)', borderRadius: 8, padding: '1.5rem', backgroundColor: 'var(--bg)', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '-10px', left: '15px', backgroundColor: 'var(--text)', color: 'var(--bg)', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                  Question {i + 1}
+                  {t('question_num')} {i + 1}
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
-                    Intitulé de la question *
-                    <input className="input" value={q.label} onChange={(e) => updateQuestion(i, { label: e.target.value })} required placeholder="Ex: Quel est ton plat préféré ?" />
+                    {t('question_label')}
+                    <input className="input" value={q.label} onChange={(e) => updateQuestion(i, { label: e.target.value })} required placeholder="..." />
                   </label>
                   <label style={{ color: 'var(--text)', fontWeight: 'bold' }}>
-                    Type de réponse
+                    {t('question_type')}
                     <select className="input" value={q.type} onChange={(e) => updateQuestion(i, { type: e.target.value })}>
-                      {QUESTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label} {t.desc}</option>)}
+                      {QUESTION_TYPES.map((qt) => <option key={qt.value} value={qt.value}>{qt.label} {qt.desc}</option>)}
                     </select>
                   </label>
                 </div>
 
                 {(q.type === 'single_choice' || q.type === 'multiple_choice') && (
                   <label style={{ color: 'var(--text)', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>
-                    Options (séparées par des virgules)
-                    <input className="input" value={q.options} onChange={(e) => updateQuestion(i, { options: e.target.value })} placeholder="Ex: Pizza, Burger, Sushi" />
+                    {t('options_placeholder')}
+                    <input className="input" value={q.options} onChange={(e) => updateQuestion(i, { options: e.target.value })} placeholder="Option 1, Option 2, ..." />
                   </label>
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)', fontWeight: 'bold', cursor: 'pointer' }}>
                     <input type="checkbox" checked={q.required} onChange={(e) => updateQuestion(i, { required: e.target.checked })} style={{ width: '20px', height: '20px', margin: 0 }} />
-                    Réponse obligatoire
+                    {t('required')}
                   </label>
                   <button type="button" className="btn" onClick={() => removeQuestion(i)} disabled={questions.length === 1} style={{ backgroundColor: '#ff6b6b', color: 'white' }}>
-                    🗑️ Supprimer
+                    🗑️ {t('delete_q')}
                   </button>
                 </div>
               </div>
@@ -214,12 +214,12 @@ export default function CreateForm({ user, onCreated }) {
           </div>
 
           <button type="button" className="btn btn-inverse" onClick={addQuestion} style={{ width: '100%', marginTop: '1.5rem', padding: '1rem' }}>
-            + Ajouter une nouvelle question
+            + {t('add_q')}
           </button>
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={saving} style={{ padding: '1rem', fontSize: '1.2rem', marginTop: '1rem' }}>
-          {saving ? 'Création en cours…' : 'Créer le formulaire 🚀'}
+          {saving ? t('creating') : t('create_btn')}
         </button>
       </form>
       
